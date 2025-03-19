@@ -90,6 +90,7 @@ Run the following command to clone the repository to your local machine:
 Move into the project folder:
 
 ```bash
+cd IP2-Project-C2
 cd JobHunter
 ```
 
