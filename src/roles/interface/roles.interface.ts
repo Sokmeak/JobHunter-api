@@ -1,0 +1,5 @@
+export enum RoleENUM {
+  ADMIN = 'ADMIN',
+  APPLICANT = 'JOB SEEKER',
+  EMPLOYER = 'EMPLOYER',
+}

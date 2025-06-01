@@ -1,16 +1,24 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
+import { databaseConfig } from './config/database.config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from './users/users.module';
+import { RolesModule } from './roles/roles.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   // Importing ConfigModule to manage environment variables
   imports: [
+    TypeOrmModule.forRoot(databaseConfig),
     ConfigModule.forRoot({
       isGlobal: true, // Makes the configuration globally available
       envFilePath: '.env', // Path to the environment file
-      ignoreEnvFile: false, // Do not ignore the .env file
     }),
+    UsersModule,
+    RolesModule,
+    forwardRef(() => AuthModule), // Forward reference to AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
