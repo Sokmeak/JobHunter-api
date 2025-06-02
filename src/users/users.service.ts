@@ -25,6 +25,7 @@ export class UsersService {
     const role = await this.roleRepo.findOne({
       where: { id: createUserDto.roleId },
     });
+    // in case we call this service without roleId
     if (!role) {
       throw new NotFoundException(
         `Role with id ${createUserDto.roleId} does not exist`,
@@ -40,6 +41,22 @@ export class UsersService {
         `User with email ${createUserDto.email} and roleId ${createUserDto.roleId} already exists`,
       );
     }
+
+    // Hash the password if needed
+    // For simplicity, assuming password is already hashed in CreateUserDto
+    // If you need to hash the password, you can use bcrypt or any other library here
+    // Example: createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
+    // Create a new user instance
+    // Ensure the roleId is set correctly
+    createUserDto.roleId = role.id; // Ensure roleId is set to the existing role's id
+    // Create a new user entity 
+      
+  
+
+
+
+
+
 
     const user = this.userRepo.create(createUserDto);
 

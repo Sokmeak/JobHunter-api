@@ -13,6 +13,8 @@ import { Logger } from '@nestjs/common';
 
 import { AppModule } from 'src/app.module';
 import { ConfigService } from '@nestjs/config';
+import { SignupDto } from './dts/signup.dto';
+import { RolesService } from 'src/roles/roles.service';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +22,7 @@ export class AuthService {
     private userService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private roleService: RolesService,
   ) {}
 
   logger = new Logger(AppModule.name);
@@ -51,14 +54,25 @@ export class AuthService {
     };
   }
 
-  async signup(userDto: CreateUserDto): Promise<{ message }> {
+  async signup(userDto: SignupDto): Promise<{ message }> {
     // Check if user already exists
     const existingUser = await this.userService.findOneByEmail(userDto.email);
     if (existingUser) {
       throw new BadRequestException('Email already in use');
     }
     // Create user
-    const user = await this.userService.create(userDto);
+    const role = await this.roleService.findRoleByName(userDto.role);
+    if (!role) {
+      throw new BadRequestException(`Role ${userDto.role} does not exist`);
+    }
+    const userDtoWithRole: CreateUserDto = {
+      email: userDto.email,
+      password: userDto.password, // Ensure password is hashed in the service
+      username: userDto.username,
+      roleId: role.id,
+     
+    };
+    const user = await this.userService.create(userDtoWithRole);
     // Generate JWT
 
     return {

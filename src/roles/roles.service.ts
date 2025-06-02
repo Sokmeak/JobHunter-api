@@ -72,6 +72,10 @@ export class RolesService {
       status: 200,
     };
   }
+  async findRoleByName(roleType: string): Promise<Role | null> {
+    // Cast the type to RoleENUM to match the entity definition
+    return this.roleRepository.findOne({ where: { type: roleType as any } });
+  }
 
   private toRoleResponse(role: Role): RoleResponseDto {
     return {
