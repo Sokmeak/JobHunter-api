@@ -17,7 +17,6 @@ import { AuthenticationGuard } from './guards/authentication/jwt-auth.guard';
 import { UsersService } from 'src/users/users.service';
 import { SignupDto } from './dts/signup.dto';
 
-
 @Controller('auth')
 export class AuthController {
   constructor(
