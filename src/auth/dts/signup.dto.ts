@@ -1,6 +1,5 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 export class SignupDto {
-
   @IsEmail()
   email: string;
 
@@ -13,4 +12,15 @@ export class SignupDto {
 
   @IsString()
   role: string;
+
+  // Only for employer
+  @IsOptional()
+  @IsString()
+  companyName: string;
+  @IsOptional()
+  @IsString()
+  companySize: string;
+  @IsOptional()
+  @IsString()
+  websiteUrl: string;
 }

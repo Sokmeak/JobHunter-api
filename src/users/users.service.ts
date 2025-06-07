@@ -1,15 +1,17 @@
 import {
   Injectable,
+  Inject,
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { Role } from 'src/roles/entities/role.entity';
+import { BcryptProvider } from './bcrypt.provider';
 
 @Injectable()
 export class UsersService {
@@ -18,6 +20,10 @@ export class UsersService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(Role)
     private readonly roleRepo: Repository<Role>,
+    // Injecting the BcryptProvider for password hashing
+    // This provider can be used to hash passwords or compare them
+
+    private readonly bcryptProvider: BcryptProvider,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
@@ -49,16 +55,13 @@ export class UsersService {
     // Create a new user instance
     // Ensure the roleId is set correctly
     createUserDto.roleId = role.id; // Ensure roleId is set to the existing role's id
-    // Create a new user entity 
-      
-  
-
-
-
-
-
+    // Create a new user entity
 
     const user = this.userRepo.create(createUserDto);
+
+
+
+ 
 
     // Reload with role relation
 
@@ -104,7 +107,7 @@ export class UsersService {
   }
 
   async findAll(): Promise<UserResponseDto[]> {
-    const users = await this.userRepo.find({ relations: ['role'] });
+    const users = await this.userRepo.find({ relations: ['role', 'company'] });
     return users.map((user) => this.toResponse(user));
   }
 
@@ -162,7 +165,10 @@ export class UsersService {
 
     // If you want to return the user without the password
     // make some validation here
-    if (user.password !== password) {
+
+    if (
+      !(await this.bcryptProvider.comparePasswords(password, user.password))
+    ) {
       throw new BadRequestException('Invalid password');
     }
     // Optionally, you can remove the password field before returning

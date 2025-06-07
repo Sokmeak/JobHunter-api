@@ -6,6 +6,7 @@ import {
   IsStrongPassword,
   Min,
   MinLength,
+  IsOptional,
 } from 'class-validator';
 export class CreateUserDto {
   @IsString()
@@ -28,4 +29,12 @@ export class CreateUserDto {
   @IsInt()
   @IsNotEmpty()
   roleId: number;
+
+  // Only for employer
+  // @IsOptional()
+  // companyName?: string;
+  // @IsOptional()
+  // companySize?: string;
+  // @IsOptional()
+  // websiteUrl?: string;
 }

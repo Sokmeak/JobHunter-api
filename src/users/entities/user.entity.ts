@@ -1,13 +1,14 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
+  OneToOne,
   Unique,
   JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 import { Role } from '../../roles/entities/role.entity';
 import { BaseEntity } from 'src/database/base.entity';
+import { Company } from 'src/companies/entities/company.entity';
 
 @Entity('users')
 @Unique(['roleId', 'email']) // Unique email per role
@@ -15,7 +16,7 @@ export class User extends BaseEntity {
   @Column()
   username: string;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Column()
@@ -27,4 +28,8 @@ export class User extends BaseEntity {
   @ManyToOne(() => Role, (role) => role.users)
   @JoinColumn({ name: 'roleId' })
   role: Role;
+
+  @OneToOne(() => Company, (company) => company.user)
+  @JoinColumn()
+  company: Company;
 }

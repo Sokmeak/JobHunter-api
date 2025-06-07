@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { RolesModule } from './roles/roles.module';
 import { AuthModule } from './auth/auth.module';
+import { CompaniesModule } from './companies/companies.module';
 
 @Module({
   // Importing ConfigModule to manage environment variables
@@ -18,7 +19,8 @@ import { AuthModule } from './auth/auth.module';
     }),
     UsersModule,
     RolesModule,
-    forwardRef(() => AuthModule), // Forward reference to AuthModule
+    forwardRef(() => AuthModule),
+    CompaniesModule, // Forward reference to AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],

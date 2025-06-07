@@ -10,15 +10,20 @@ import {
 
 import { AuthService } from './auth.service';
 import { RolesGuard } from './guards/role.guard';
-import { CreateUserDto } from '../users/dto/create-user.dto';
+
 import { LoginDto } from './dts/login.dto';
 import { AppModule } from 'src/app.module';
 import { AuthenticationGuard } from './guards/authentication/jwt-auth.guard';
 import { UsersService } from 'src/users/users.service';
+import { SignupDto } from './dts/signup.dto';
+
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService, private readonly usersService: UsersService) {}
+  constructor(
+    private authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {}
 
   private logger = new Logger(AppModule.name);
 
@@ -28,8 +33,8 @@ export class AuthController {
   }
 
   @Post('signup')
-  async signup(@Body() createUserDto: CreateUserDto) {
-    return this.authService.signup(createUserDto);
+  async signup(@Body() signupDto: SignupDto) {
+    return this.authService.signup(signupDto);
   }
 
   @UseGuards(AuthenticationGuard, RolesGuard)
@@ -46,7 +51,7 @@ export class AuthController {
     return {
       userId: req.user.id,
       email: req.user.email,
-      role: req.user.role_id === 1 ? 'freelancer' : 'admin',
+      role: req.user.role.type,
     };
   }
 }

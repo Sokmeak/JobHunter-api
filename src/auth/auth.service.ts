@@ -15,6 +15,12 @@ import { AppModule } from 'src/app.module';
 import { ConfigService } from '@nestjs/config';
 import { SignupDto } from './dts/signup.dto';
 import { RolesService } from 'src/roles/roles.service';
+import { BcryptProvider } from 'src/users/bcrypt.provider';
+import { CompaniesService } from 'src/companies/companies.service';
+import { CreateCompanyDto } from 'src/companies/dto/create-company.dto';
+// import { Role } from 'src/roles/entities/role.entity';
+// import { InjectRepository } from '@nestjs/typeorm';
+// import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +29,8 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private roleService: RolesService,
+    private bcryptProvider: BcryptProvider,
+    private companyService: CompaniesService,
   ) {}
 
   logger = new Logger(AppModule.name);
@@ -44,7 +52,7 @@ export class AuthService {
       email: user.email,
       role: user.role,
     };
-    log(payload);
+    // log(payload);
 
     return {
       access_token: this.jwtService.sign(payload, {
@@ -54,7 +62,7 @@ export class AuthService {
     };
   }
 
-  async signup(userDto: SignupDto): Promise<{ message }> {
+  async signup(userDto: SignupDto): Promise<{ message: string }> {
     // Check if user already exists
     const existingUser = await this.userService.findOneByEmail(userDto.email);
     if (existingUser) {
@@ -67,16 +75,43 @@ export class AuthService {
     }
     const userDtoWithRole: CreateUserDto = {
       email: userDto.email,
-      password: userDto.password, // Ensure password is hashed in the service
+      // hashing the password
+      password: await this.bcryptProvider.hashPassword(userDto.password),
       username: userDto.username,
       roleId: role.id,
-     
     };
+    console.log('userDtoWithRole', userDtoWithRole);
+
     const user = await this.userService.create(userDtoWithRole);
-    // Generate JWT
+
+    // If employer, create company
+    if (userDto.role === 'EMPLOYER') {
+      const companyData: CreateCompanyDto = {
+        userId: user.id,
+        name: userDto.companyName,
+        employee_count: String(userDto.companySize), // ensure string
+        email: userDto.email, // should be a valid email, not website
+        website_url: userDto.websiteUrl || '',
+        // Optional fields, add if available in userDto
+        founded_date: '',
+        industry: '',
+        office_location: '',
+        twitter_url: '',
+        facebook_url: '',
+        linked_url: '',
+        headquarters_location: '',
+        isActive: true,
+        isVerified: false,
+      };
+      await this.companyService.create(companyData);
+    }
+
+    // // Generate JWT
+    // const payload = { sub: user.id, email: user.email, role: userDto.role };
+    // const token = await this.jwtService.signAsync(payload);
 
     return {
-      message: 'sigup successfully!',
+      message: 'Signup successfully!',
     };
   }
 }
