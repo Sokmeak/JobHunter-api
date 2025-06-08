@@ -4,11 +4,11 @@ import * as Minio from 'minio';
 @Injectable()
 export class MinioService {
   private minioClient = new Minio.Client({
-    endPoint: 'localhost',
+    endPoint: 'minio',
     port: 9000,
     useSSL: false,
-    accessKey: 'RGSm91Drl6VqD2Nk',
-    secretKey: 'vYE0JunvdKN2jSF4wpwG4FkvAmSB4YZt',
+    accessKey: 'XFDRxox6ZFGHJypb',
+    secretKey: 'WRDtuJzSFN6TulNmrAUt0VZiNGffD6T0',
   });
 
   async uploadFile(file: Express.Multer.File) {
