@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -58,10 +58,6 @@ export class UsersService {
     // Create a new user entity
 
     const user = this.userRepo.create(createUserDto);
-
-
-
- 
 
     // Reload with role relation
 

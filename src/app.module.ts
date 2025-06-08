@@ -9,6 +9,7 @@ import { RolesModule } from './roles/roles.module';
 import { AuthModule } from './auth/auth.module';
 import { CompaniesModule } from './companies/companies.module';
 import { FilesModule } from './files/files.module';
+import { JobseekersModule } from './jobseekers/jobseekers.module';
 
 @Module({
   // Importing ConfigModule to manage environment variables
@@ -22,7 +23,8 @@ import { FilesModule } from './files/files.module';
     RolesModule,
     forwardRef(() => AuthModule),
     CompaniesModule,
-    FilesModule, // Forward reference to AuthModule
+    FilesModule,
+    JobseekersModule, // Forward reference to AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],

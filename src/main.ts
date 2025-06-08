@@ -25,10 +25,10 @@ async function bootstrap() {
     }
     console.log('✅ Successfully connected to PostgreSQ ');
   } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     console.error('❌ Failed to connect to PostgreSQL:', error.message);
     process.exit(1);
   }
-
 
   log('🔧 CORS enabled for all origins');
   log('🎉 Application started successfully');

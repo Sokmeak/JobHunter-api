@@ -7,8 +7,8 @@ export class MinioService {
     endPoint: 'minio',
     port: 9000,
     useSSL: false,
-    accessKey: 'XFDRxox6ZFGHJypb',
-    secretKey: 'WRDtuJzSFN6TulNmrAUt0VZiNGffD6T0',
+    accessKey: 'BD4R5vfrR8C36xSeOuC1',
+    secretKey: 'CD5dju2VQM2IQoXDoqN1sk0uX1LLeW8JfycpFrEM',
   });
 
   async uploadFile(file: Express.Multer.File) {
