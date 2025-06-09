@@ -2,12 +2,12 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { JobSeeker } from '../entities/jobseeker.entity';
 import { Job } from '../jobs/job.entity';
-import { Company } from '../companies/company.entity';
+import { Company } from 'src/companies/entities/company.entity';
+import { BaseEntity } from 'src/database/base.entity';
 
 @Entity('interview_invitations')
-export class InterviewInvitation {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class InterviewInvitation  extends BaseEntity{
+ 
 
   @ManyToOne(() => JobSeeker, (jobSeeker) => jobSeeker.interviewInvitations, {
     onDelete: 'CASCADE',
