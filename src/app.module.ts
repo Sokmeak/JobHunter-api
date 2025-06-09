@@ -9,7 +9,8 @@ import { RolesModule } from './roles/roles.module';
 import { AuthModule } from './auth/auth.module';
 import { CompaniesModule } from './companies/companies.module';
 import { FilesModule } from './files/files.module';
-import { JobseekersModule } from './jobseekers/jobseekers.module';
+import { JobSeekersModule } from './jobseekers/jobseekers.module';
+
 import { TestsModule } from './tests/tests.module';
 import { SeedModule } from './seed/seed.module';
 
@@ -26,9 +27,7 @@ import { SeedModule } from './seed/seed.module';
     forwardRef(() => AuthModule),
     CompaniesModule,
     FilesModule,
-    JobseekersModule,
-    TestsModule,
-    SeedModule, // Forward reference to AuthModule
+    JobSeekersModule, // Forward reference to AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],

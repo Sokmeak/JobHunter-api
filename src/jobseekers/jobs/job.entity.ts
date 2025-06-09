@@ -1,7 +1,7 @@
 // job.entity.ts (assumed for reference)
 import { Entity, Column, ManyToOne } from 'typeorm';
 import { BaseEntity } from 'src/database/base.entity';
-import { Company } from '../companies/company.entity';
+import { Company } from 'src/companies/entities/company.entity';
 import { IsString } from 'class-validator';
 
 @Entity('jobs')
