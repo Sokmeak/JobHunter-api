@@ -10,6 +10,8 @@ import { AuthModule } from './auth/auth.module';
 import { CompaniesModule } from './companies/companies.module';
 import { FilesModule } from './files/files.module';
 import { JobseekersModule } from './jobseekers/jobseekers.module';
+import { TestsModule } from './tests/tests.module';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   // Importing ConfigModule to manage environment variables
@@ -24,7 +26,9 @@ import { JobseekersModule } from './jobseekers/jobseekers.module';
     forwardRef(() => AuthModule),
     CompaniesModule,
     FilesModule,
-    JobseekersModule, // Forward reference to AuthModule
+    JobseekersModule,
+    TestsModule,
+    SeedModule, // Forward reference to AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
