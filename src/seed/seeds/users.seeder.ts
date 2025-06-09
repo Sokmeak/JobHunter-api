@@ -39,6 +39,12 @@ export class UsersSeeder {
         password: hashedPassword,
         role: this.roles[2],
       },
+       {
+        username: 'heng_davitt',
+        email: 'davith@example.com',
+        password: hashedPassword,
+        role: this.roles[2],
+      },
     ];
 
     const result = await this.userRepo.save(users);
