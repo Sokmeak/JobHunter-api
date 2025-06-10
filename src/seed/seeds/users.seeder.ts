@@ -10,7 +10,7 @@ export class UsersSeeder {
   ) {}
 
   async run() {
-    await this.userRepo.clear();
+    //await this.userRepo.clear();
     const password = '123456';
     const hashedPassword = await this.hashPassword('123456');
 

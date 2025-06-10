@@ -4,9 +4,8 @@ import { BaseEntity } from 'src/database/base.entity';
 import { Company } from 'src/companies/entities/company.entity';
 import { IsString } from 'class-validator';
 
-@Entity('jobs')
+@Entity('job_test')
 export class Job extends BaseEntity {
-    
   @IsString()
   title: string;
 

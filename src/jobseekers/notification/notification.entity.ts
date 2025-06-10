@@ -4,7 +4,7 @@ import { User } from 'src/users/entities/user.entity';
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 
 
-@Entity('notifications')
+@Entity('notifications-applicant')
 export class Notification extends BaseEntity{
 
 
