@@ -4,6 +4,7 @@ import * as Minio from 'minio';
 import { MINIO_CLIENT } from './minio/minio.module';
 import { randomUUID } from 'crypto';
 import * as sharp from 'sharp';
+import * as path from 'path';
 import { Readable } from 'stream';
 
 @Injectable()
@@ -11,6 +12,7 @@ export class FilesService {
   private readonly bucketName: string;
   private readonly originalPrefix = 'originals/';
   private readonly thumbnailPrefix = 'thumbnails/';
+  private readonly documentPrefix = 'documents/';
 
   constructor(
     @Inject(MINIO_CLIENT) private readonly minioClient: Minio.Client,
@@ -38,41 +40,61 @@ export class FilesService {
     const fileName = `${randomUUID()}-${file.originalname}`;
     const originalPath = `${this.originalPrefix}${fileName}`;
     const thumbnailPath = `${this.thumbnailPrefix}${fileName}`;
+    const docPath = `${this.documentPrefix}${fileName}`;
 
-    // Upload original file
-    await this.minioClient.putObject(
-      this.bucketName,
-      originalPath,
-      file.buffer,
-      file.size,
-      { 'Content-Type': file.mimetype },
+    // Check file extension
+    const extension = path.extname(file.originalname).toLowerCase();
+    const isImage = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg'].includes(
+      extension,
     );
 
-    // Generate and upload thumbnail (resize to 200x200 as an example)
-    try {
-      const thumbnailBuffer = await sharp(file.buffer)
-        .resize({ width: 200, height: 200, fit: 'inside' })
-        .toBuffer();
+    if (isImage) {
+      // Generate and upload thumbnail for PNG and JPG
 
       await this.minioClient.putObject(
         this.bucketName,
-        thumbnailPath,
-        thumbnailBuffer,
-        thumbnailBuffer.length,
+        originalPath,
+        file.buffer,
+        file.size,
         { 'Content-Type': file.mimetype },
       );
-    } catch (error) {
-      console.error('Error generating thumbnail:', error);
-      await this.minioClient.removeObject(this.bucketName, originalPath);
-      throw new Error(`Thumbnail generation failed: ${error.message}`);
+
+      try {
+        const thumbnailBuffer = await sharp(file.buffer)
+          .resize({ width: 200, height: 200, fit: 'inside' })
+          .toBuffer();
+
+        await this.minioClient.putObject(
+          this.bucketName,
+          thumbnailPath,
+          thumbnailBuffer,
+          thumbnailBuffer.length,
+          { 'Content-Type': file.mimetype },
+        );
+      } catch (error) {
+        console.error('Error generating thumbnail:', error);
+        await this.minioClient.removeObject(this.bucketName, originalPath);
+        throw new Error(`Thumbnail generation failed: ${error.message}`);
+      }
+    } else {
+      // Upload original file
+
+      await this.minioClient.putObject(
+        this.bucketName,
+        docPath,
+        file.buffer,
+        file.size,
+        { 'Content-Type': file.mimetype },
+      );
     }
 
     return {
+      bucketName: this.bucketName,
       fileName,
       originalName: file.originalname,
       size: file.size,
-      originalPath,
-      thumbnailPath,
+      originalPath: isImage ? originalPath : docPath,
+      thumbnailPath: isImage ? thumbnailPath : null,
     };
   }
 
