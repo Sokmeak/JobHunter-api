@@ -14,7 +14,7 @@ import { FilesService } from './files.service';
 import * as multer from 'multer';
 import { Express } from 'express';
 
-@Controller('file')
+@Controller('files')
 export class FileController {
   constructor(private readonly filesService: FilesService) {}
 
@@ -24,8 +24,7 @@ export class FileController {
       storage: multer.memoryStorage(),
       limits: { fileSize: 10 * 1024 * 1024 },
     }),
-    )
-    
+  )
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new Error('No file uploaded');

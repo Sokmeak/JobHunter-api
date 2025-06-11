@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as Minio from 'minio';
 import { MINIO_CLIENT } from './minio/minio.module';
@@ -120,7 +120,7 @@ export class FilesService {
       return { stream: object, contentType };
     } catch (error) {
       console.error(`Error fetching file ${objectPath}:`, error);
-      throw new Error(`Failed to fetch file: ${error.message}`);
+      throw new NotFoundException(`Failed to fetch file: ${error.message}`);
     }
   }
 
