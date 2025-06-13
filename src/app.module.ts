@@ -11,9 +11,6 @@ import { CompaniesModule } from './companies/companies.module';
 import { FilesModule } from './files/files.module';
 import { JobSeekersModule } from './jobseekers/jobseekers.module';
 
-import { TestsModule } from './tests/tests.module';
-import { SeedModule } from './seed/seed.module';
-
 @Module({
   // Importing ConfigModule to manage environment variables
   imports: [

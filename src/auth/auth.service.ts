@@ -18,6 +18,7 @@ import { RolesService } from 'src/roles/roles.service';
 import { BcryptProvider } from 'src/users/bcrypt.provider';
 import { CompaniesService } from 'src/companies/companies.service';
 import { CreateCompanyDto } from 'src/companies/dto/create-company.dto';
+import { stringify } from 'querystring';
 // import { Role } from 'src/roles/entities/role.entity';
 // import { InjectRepository } from '@nestjs/typeorm';
 // import { Repository } from 'typeorm';
@@ -103,7 +104,7 @@ export class AuthService {
         isActive: true,
         isVerified: false,
       };
-      await this.companyService.create(companyData);
+      await this.companyService.createCompany(String(user.id), companyData);
     }
 
     // // Generate JWT

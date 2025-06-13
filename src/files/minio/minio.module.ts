@@ -9,13 +9,13 @@ export const MINIO_CLIENT = 'MINIO_CLIENT';
   providers: [
     {
       provide: MINIO_CLIENT,
-      useFactory: () => {
+      useFactory: async (configService: ConfigService) => {
         const client = new Minio.Client({
-          endPoint: 'minio',
-          port: 9000,
-          useSSL: false,
-          accessKey: 'BD4R5vfrR8C36xSeOuC1',
-          secretKey: 'CD5dju2VQM2IQoXDoqN1sk0uX1LLeW8JfycpFrEM',
+          endPoint: configService.getOrThrow('MINIO_ENDPOINT'),
+          port: +configService.getOrThrow('MINIO_PORT'),
+          useSSL: configService.getOrThrow('MINIO_USE_SSL') === 'true',
+          accessKey: configService.getOrThrow('MINIO_ACCESS_KEY'),
+          secretKey: configService.getOrThrow('MINIO_SECRET_KEY'),
         });
         return client;
       },
