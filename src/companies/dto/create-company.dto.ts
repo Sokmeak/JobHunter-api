@@ -14,12 +14,16 @@ export class CreateCompanyDto {
   name: string;
 
   @IsEmail()
-
+  @IsOptional()
   website_url: string;
 
   @IsString()
   @IsOptional()
   founded_date: string;
+
+  @IsString()
+  @IsOptional()
+  brand_logo: string;
 
   @IsString()
   employee_count: string;
@@ -47,14 +51,13 @@ export class CreateCompanyDto {
   @IsEmail()
   email: string;
 
-  // extract from user
-//   @IsString()
-//   @IsOptional()
-//   hr_contact_name: string;
+  @IsString()
+  @IsOptional()
+  hr_contact_name: string;
 
-//   @IsEmail()
-//   @IsOptional()
-//   hr_contact_email: string;
+  @IsEmail()
+  @IsOptional()
+  hr_contact_email: string;
 
   @IsString()
   @IsOptional()

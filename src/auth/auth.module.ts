@@ -46,7 +46,7 @@ import { FilesService } from 'src/files/files.service';
     forwardRef(() => UsersModule),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'default-secret',
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '1min' },
     }),
   ],
   controllers: [AuthController],

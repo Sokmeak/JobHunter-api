@@ -75,6 +75,7 @@ import { CompanyDocument } from './company-document.entity';
 import { Job } from './job.entity';
 import { User } from 'src/users/entities/user.entity';
 import { BaseEntity } from 'src/database/base.entity';
+import { Colors } from 'chart.js';
 
 @Entity('companies')
 export class Company extends BaseEntity {
@@ -86,6 +87,8 @@ export class Company extends BaseEntity {
 
   @Column({ length: 255 })
   name: string;
+
+ 
 
   @Column({ type: 'text', nullable: true })
   website_url: string;

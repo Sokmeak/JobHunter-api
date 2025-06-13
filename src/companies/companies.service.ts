@@ -144,6 +144,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, In } from 'typeorm';
@@ -177,6 +178,7 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { UpdateApplicationStatusDto } from './dto/update-application-status.dto';
 import { ScheduleInterviewDto } from './dto/schedule-interview.dto';
 import { SendNotificationDto } from './dto/send-notification.dto';
+import { log } from 'console';
 
 @Injectable()
 export class CompaniesService {
@@ -207,6 +209,8 @@ export class CompaniesService {
     private notificationRepository: Repository<Notification>,
     private filesService: FilesService,
   ) {}
+
+  private readonly logger = new Logger(CompaniesService.name);
 
   async createCompany(
     userId: string,
@@ -266,6 +270,73 @@ export class CompaniesService {
     return savedCompany;
   }
 
+  async getCompanyById(id: number): Promise<
+    Company & {
+      officeImages: Array<{
+        id: number;
+        image_url: string;
+        thumbnail_url: string;
+        caption?: string;
+      }>;
+    }
+  > {
+    const company = await this.companyRepository.findOne({
+      where: { id, isActive: true },
+      relations: [
+        'members',
+        'technologies',
+        'officeLocations',
+        'officeLocations.images',
+        'benefits',
+        'documents',
+        'jobs',
+      ],
+    });
+
+    if (!company) throw new NotFoundException('Company not found or inactive');
+
+    // Aggregate office images from all office locations
+    const officeImages = company.officeLocations.flatMap((location) =>
+      location.images.map((image) => ({
+        id: image.id,
+        image_url: image.image_url,
+        thumbnail_url: '',
+        caption: image.caption,
+      })),
+    );
+
+    // Generate thumbnails for office images
+    for (const officeImage of officeImages) {
+      officeImage.thumbnail_url = await this.filesService.getFileUrl(
+        officeImage.image_url.split('/').pop() ?? '',
+        'thumbnail',
+      );
+    }
+
+    // Generate thumbnails for brand_logo and companiesImages
+    if (company.brand_logo) {
+      company['brand_logo_thumbnail'] = await this.filesService.getFileUrl(
+        company.brand_logo.split('/').pop() ?? '',
+        'thumbnail',
+      );
+    }
+    if (company.companiesImages) {
+      company['companiesImages_thumbnail'] = await this.filesService.getFileUrl(
+        company.companiesImages.split('/').pop() ?? '',
+        'thumbnail',
+      );
+    }
+    for (const document of company.documents) {
+      document['document_url_thumbnail'] = await this.filesService.getFileUrl(
+        document.document_url.split('/').pop() ?? '',
+        'thumbnail',
+      );
+    }
+
+    // Return company with aggregated officeImages
+    return { ...(company as any), officeImages };
+  }
+
   async getCompany(userId: string): Promise<
     Company & {
       officeImages: Array<{
@@ -288,6 +359,7 @@ export class CompaniesService {
         'jobs',
       ],
     });
+
     if (!company) throw new NotFoundException('Company not found or inactive');
 
     // Aggregate office images from all office locations

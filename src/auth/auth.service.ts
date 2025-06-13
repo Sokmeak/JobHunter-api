@@ -91,9 +91,11 @@ export class AuthService {
         userId: user.id,
         name: userDto.companyName,
         employee_count: String(userDto.companySize), // ensure string
-        email: userDto.email, // should be a valid email, not website
+        email: '', // should be a valid email, not website
         website_url: userDto.websiteUrl || '',
         // Optional fields, add if available in userDto
+        hr_contact_name: userDto.username,
+        hr_contact_email: user.email,
         founded_date: '',
         industry: '',
         office_location: '',
@@ -103,6 +105,9 @@ export class AuthService {
         headquarters_location: '',
         isActive: true,
         isVerified: false,
+        brand_logo: ''
+      
+        
       };
       await this.companyService.createCompany(String(user.id), companyData);
     }
