@@ -13,7 +13,7 @@ export const databaseConfig: TypeOrmModuleOptions & DataSourceOptions = {
   database: String(process.env.DB_NAME), // e.g., 'mydatabase'
   entities: [__dirname + '/../**/*.entity.{ts,js}'], // Correct for NestJS structure
   migrations: [__dirname + '/../database/migrations/*.{ts,js}'], // Good
-  synchronize: false, // Set to false in production
+  synchronize: true, // Set to false in production
   migrationsRun: false,
   autoLoadEntities: true, // Handy for NestJS
 };

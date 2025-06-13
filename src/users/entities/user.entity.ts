@@ -11,8 +11,7 @@ import { Role } from '../../roles/entities/role.entity';
 import { BaseEntity } from 'src/database/base.entity';
 import { Company } from 'src/companies/entities/company.entity';
 
-import { Notification } from 'src/jobseekers/notification/notification.entity';
-
+import { Notification } from 'src/jobseekers/entities/notification.entity';
 
 @Entity('users')
 @Unique(['roleId', 'email']) // Unique email per role
@@ -36,7 +35,6 @@ export class User extends BaseEntity {
   @OneToOne(() => Company, (company) => company.user)
   @JoinColumn()
   company: Company;
-
 
   @OneToMany(() => Notification, (notification) => notification.user)
   notifications: Notification[];

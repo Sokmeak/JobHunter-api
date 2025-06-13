@@ -1,6 +1,6 @@
 import { BaseEntity } from 'src/database/base.entity';
 import { JobSeeker } from 'src/jobseekers/entities/jobseeker.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
+import { Entity, Column, OneToOne } from 'typeorm';
 
 @Entity('interview_preferences')
 export class InterviewPreference extends BaseEntity {

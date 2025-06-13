@@ -1,10 +1,9 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { JobSeeker } from '../entities/jobseeker.entity';
+import { JobSeeker } from './jobseeker.entity';
 import { BaseEntity } from 'src/database/base.entity';
 
 @Entity('resumes')
-export class Resume extends BaseEntity{
-
+export class Resume extends BaseEntity {
   @ManyToOne(() => JobSeeker, (jobSeeker) => jobSeeker.resumes, {
     onDelete: 'CASCADE',
   })

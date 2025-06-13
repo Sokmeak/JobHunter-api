@@ -55,3 +55,5 @@ export class Company extends BaseEntity {
   @OneToOne(() => User, (user) => user.company)
   user: User;
 }
+
+

@@ -8,21 +8,22 @@ import {
   UseInterceptors,
   UploadedFile,
   Request,
+  Delete,
 } from '@nestjs/common';
-
-import * as multer from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as multer from 'multer'; // Ensure this import works
+import { Express } from 'express';
 import { JobSeekersService } from './jobseekers.service';
 import { CreateJobSeekerDto } from './dto/create-jobseeker.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { CreateResumeDto } from './resume/dto/create-resume.dto';
-import { CreateJobApplicationDto } from './application/dto/create-job-application.dto';
-import { CreateSavedJobDto } from './jobs/dto/create-saved-job.dto';
-import { CreateInterviewPreferenceDto } from './interview-preference/dto/create-interview-preference.dto';
-import { UpdateInterviewInvitationDto } from './interview-invitation/dto/update-interview-invitation.dto';
-import { CreateEducationHistoryDto } from './education/dto/create-education.dto';
-import { CreateWorkExperienceDto } from './experience/dto/create-experience.dto';
-import { CreateSkillTagDto } from './skill/dto/create-skill.dto';
-import { CreateJobAlertDto } from './job-alert/dto/create-job-alert.dto';
+import { CreateResumeDto } from './dto/create-resume.dto';
+import { CreateJobApplicationDto } from './dto/create-job-application.dto';
+import { CreateSavedJobDto } from './dto/create-saved-job.dto';
+import { CreateInterviewPreferenceDto } from './dto/create-interview-preference.dto';
+import { UpdateInterviewInvitationDto } from './dto/update-interview-invitation.dto';
+import { CreateEducationHistoryDto } from './dto/create-education.dto';
+import { CreateWorkExperienceDto } from './dto/create-experience.dto';
+import { CreateSkillTagDto } from './dto/create-skill.dto';
+import { CreateJobAlertDto } from './dto/create-job-alert.dto';
 
 @Controller('job-seekers')
 export class JobSeekersController {
@@ -33,27 +34,21 @@ export class JobSeekersController {
     @Request() req,
     @Body() createJobSeekerDto: CreateJobSeekerDto,
   ) {
-    return this.jobSeekersService.createJobSeeker(
-      req.user.id,
-      createJobSeekerDto,
-    );
+    return this.jobSeekersService.createJobSeeker(req.user.id, createJobSeekerDto);
   }
 
   @Patch('profile')
   updateProfile(
     @Request() req,
-    @Body() updateJobSeekerDto: CreateJobSeekerDto,
+    @Body() createJobSeekerDto: CreateJobSeekerDto,
   ) {
-    return this.jobSeekersService.updateJobSeeker(
-      req.user.id,
-      updateJobSeekerDto,
-    );
+    return this.jobSeekersService.updateJobSeeker(req.user.id, createJobSeekerDto);
   }
 
   @Post('profile-image')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: multer.memoryStorage(),
+      storage: multer.memoryStorage(), // Fixed import should resolve this
       limits: { fileSize: 10 * 1024 * 1024 },
     }),
   )
@@ -81,11 +76,12 @@ export class JobSeekersController {
     @UploadedFile() file: Express.Multer.File,
     @Body() createResumeDto: CreateResumeDto,
   ) {
-    return this.jobSeekersService.uploadResume(
-      req.user.id,
-      file,
-      createResumeDto,
-    );
+    return this.jobSeekersService.uploadResume(req.user.id, file, createResumeDto);
+  }
+
+  @Delete('resumes/:id')
+  deleteResume(@Request() req, @Param('id') resumeId: string) {
+    return this.jobSeekersService.deleteResume(req.user.id, resumeId);
   }
 
   @Post('applications')
@@ -93,18 +89,12 @@ export class JobSeekersController {
     @Request() req,
     @Body() createJobApplicationDto: CreateJobApplicationDto,
   ) {
-    return this.jobSeekersService.applyForJob(
-      req.user.id,
-      createJobApplicationDto,
-    );
+    return this.jobSeekersService.applyForJob(req.user.id, createJobApplicationDto);
   }
 
   @Get('applications/:id/status')
   getApplicationStatus(@Request() req, @Param('id') applicationId: string) {
-    return this.jobSeekersService.getApplicationStatus(
-      req.user.id,
-      applicationId,
-    );
+    return this.jobSeekersService.getApplicationStatus(req.user.id, applicationId);
   }
 
   @Post('saved-jobs')
@@ -117,10 +107,7 @@ export class JobSeekersController {
     @Request() req,
     @Body() createInterviewPreferenceDto: CreateInterviewPreferenceDto,
   ) {
-    return this.jobSeekersService.setInterviewPreference(
-      req.user.id,
-      createInterviewPreferenceDto,
-    );
+    return this.jobSeekersService.setInterviewPreference(req.user.id, createInterviewPreferenceDto);
   }
 
   @Get('interview-invitations')
@@ -134,11 +121,7 @@ export class JobSeekersController {
     @Param('id') invitationId: string,
     @Body() updateInterviewInvitationDto: UpdateInterviewInvitationDto,
   ) {
-    return this.jobSeekersService.updateInterviewInvitation(
-      req.user.id,
-      invitationId,
-      updateInterviewInvitationDto,
-    );
+    return this.jobSeekersService.updateInterviewInvitation(req.user.id, invitationId, updateInterviewInvitationDto);
   }
 
   @Post('education-history')
@@ -146,10 +129,24 @@ export class JobSeekersController {
     @Request() req,
     @Body() createEducationHistoryDto: CreateEducationHistoryDto,
   ) {
-    return this.jobSeekersService.addEducationHistory(
-      req.user.id,
-      createEducationHistoryDto,
-    );
+    return this.jobSeekersService.addEducationHistory(req.user.id, createEducationHistoryDto);
+  }
+
+  @Patch('education-history/:id')
+  updateEducationHistory(
+    @Request() req,
+    @Param('id') educationId: string,
+    @Body() createEducationHistoryDto: CreateEducationHistoryDto,
+  ) {
+    return this.jobSeekersService.updateEducationHistory(req.user.id, educationId, createEducationHistoryDto);
+  }
+
+  @Delete('education-history/:id')
+  deleteEducationHistory(
+    @Request() req,
+    @Param('id') educationId: string,
+  ) {
+    return this.jobSeekersService.deleteEducationHistory(req.user.id, educationId);
   }
 
   @Post('work-experience')
@@ -157,15 +154,40 @@ export class JobSeekersController {
     @Request() req,
     @Body() createWorkExperienceDto: CreateWorkExperienceDto,
   ) {
-    return this.jobSeekersService.addWorkExperience(
-      req.user.id,
-      createWorkExperienceDto,
-    );
+    return this.jobSeekersService.addWorkExperience(req.user.id, createWorkExperienceDto);
+  }
+
+  @Patch('work-experience/:id')
+  updateWorkExperience(
+    @Request() req,
+    @Param('id') experienceId: string,
+    @Body() createWorkExperienceDto: CreateWorkExperienceDto,
+  ) {
+    return this.jobSeekersService.updateWorkExperience(req.user.id, experienceId, createWorkExperienceDto);
+  }
+
+  @Delete('work-experience/:id')
+  deleteWorkExperience(
+    @Request() req,
+    @Param('id') experienceId: string,
+  ) {
+    return this.jobSeekersService.deleteWorkExperience(req.user.id, experienceId);
   }
 
   @Post('skill-tags')
-  addSkillTag(@Request() req, @Body() createSkillTagDto: CreateSkillTagDto) {
+  addSkillTag(
+    @Request() req,
+    @Body() createSkillTagDto: CreateSkillTagDto,
+  ) {
     return this.jobSeekersService.addSkillTag(req.user.id, createSkillTagDto);
+  }
+
+  @Delete('skill-tags/:id')
+  deleteSkillTag(
+    @Request() req,
+    @Param('id') skillId: string,
+  ) {
+    return this.jobSeekersService.deleteSkillTag(req.user.id, skillId);
   }
 
   @Get('notifications')
@@ -175,38 +197,12 @@ export class JobSeekersController {
 
   @Patch('notifications/:id/read')
   markNotificationAsRead(@Request() req, @Param('id') notificationId: string) {
-    return this.jobSeekersService.markNotificationAsRead(
-      req.user.id,
-      notificationId,
-    );
+    return this.jobSeekersService.markNotificationAsRead(req.user.id, notificationId);
   }
-
-  // @Post('search-jobs')
-  // searchJobs(@Body() searchJobsDto: SearchJobsDto) {
-  //   return this.jobSeekersService.searchJobs(searchJobsDto);
-  // }
-
-  // @Get('job-recommendations')
-  // getJobRecommendations(@Request() req) {
-  //   return this.jobSeekersService.getJobRecommendations(req.user.id);
-  // }
-
-  // @Get('salary-insights')
-  // getSalaryInsights(@Query('industry') industry: string) {
-  //   return this.jobSeekersService.getSalaryInsights(industry);
-  // }
-
-  // @Get('company-reviews/:companyId')
-  // getCompanyReviews(@Param('companyId') companyId: string) {
-  //   return this.jobSeekersService.getCompanyReviews(companyId);
-  // }
 
   @Post('job-alerts')
   createJobAlert(@Request() req, @Body() createJobAlertDto: CreateJobAlertDto) {
-    return this.jobSeekersService.createJobAlert(
-      req.user.id,
-      createJobAlertDto,
-    );
+    return this.jobSeekersService.createJobAlert(req.user.id, createJobAlertDto);
   }
 
   @Get('job-alerts')
