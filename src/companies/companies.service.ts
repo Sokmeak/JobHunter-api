@@ -1,145 +1,3 @@
-// import {
-//   ConflictException,
-//   Injectable,
-//   NotFoundException,
-// } from '@nestjs/common';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { Repository } from 'typeorm';
-// import { Company } from './entities/company.entity';
-// import { CreateCompanyDto } from './dtos/create-company.dto';
-// import { UpdateCompanyDto } from './dtos/update-company.dto';
-// import { User } from '../users/entities/user.entity';
-
-// import { plainToInstance } from 'class-transformer';
-// import { CompanyResponseDto } from './dtos/company-response.dto';
-
-// @Injectable()
-// export class CompaniesService {
-//   constructor(
-//     @InjectRepository(Company)
-//     private readonly companyRepository: Repository<Company>,
-
-//     @InjectRepository(User)
-//     private readonly userRepository: Repository<User>,
-//   ) {}
-
-//   async create(
-//     createCompanyDto: CreateCompanyDto,
-//   ): Promise<CompanyResponseDto> {
-//     const user = await this.userRepository.findOneBy({
-//       id: createCompanyDto.userId,
-//     });
-
-//     if (!user) throw new NotFoundException('User not found');
-
-//     const existing = await this.companyRepository.findOne({
-//       where: { user: { id: user.id } },
-//     });
-//     if (existing) throw new ConflictException('User already has a company');
-
-//     const company = this.companyRepository.create({
-//       ...createCompanyDto,
-//       user,
-//     });
-
-//     const savedCompany = await this.companyRepository.save(company);
-
-//     return plainToInstance(CompanyResponseDto, {
-//       ...savedCompany,
-//       hr_contact: {
-//         name: user.username,
-//         email: user.email,
-//       },
-//     });
-//   }
-
-//   async findAll(): Promise<CompanyResponseDto[]> {
-//     const companies = await this.companyRepository.find({
-//       relations: ['user'],
-//     });
-
-//     return companies.map((company) =>
-//       plainToInstance(CompanyResponseDto, {
-//         ...company,
-//         hr_contact: {
-//           name: company.user?.username,
-//           email: company.user?.email,
-//         },
-//       }),
-//     );
-//   }
-
-//   async findOne(id: number): Promise<CompanyResponseDto> {
-//     const company = await this.companyRepository.findOne({
-//       where: { id },
-//       relations: ['user'],
-//     });
-
-//     if (!company) {
-//       throw new NotFoundException(`Company with id ${id} not found!`);
-//     }
-
-//     return plainToInstance(CompanyResponseDto, {
-//       ...company,
-//       hr_contact: {
-//         name: company.user?.username,
-//         email: company.user?.email,
-//       },
-//     });
-//   }
-
-//   async update(
-//     id: number,
-//     updateCompanyDto: UpdateCompanyDto,
-//   ): Promise<CompanyResponseDto> {
-//     const company = await this.companyRepository.findOne({
-//       where: { id },
-//       relations: ['user'],
-//     });
-//     if (!company) throw new NotFoundException('Company not found');
-
-//     Object.assign(company, updateCompanyDto);
-
-//     const updatedCompany = await this.companyRepository.save(company);
-
-//     return plainToInstance(CompanyResponseDto, {
-//       ...updatedCompany,
-//       hr_contact: {
-//         name: updatedCompany.user?.username,
-//         email: updatedCompany.user?.email,
-//       },
-//     });
-//   }
-
-//   async remove(id: number): Promise<void> {
-//     const company = await this.companyRepository.findOneBy({ id });
-//     if (!company) throw new NotFoundException('Company not found');
-
-//     await this.companyRepository.remove(company);
-//   }
-
-//   async findByUserId(userId: number): Promise<CompanyResponseDto> {
-//     const company = await this.companyRepository.findOne({
-//       where: { user: { id: userId } },
-//       relations: ['user'],
-//     });
-
-//     if (!company) {
-//       throw new NotFoundException(
-//         `Company for user with id ${userId} not found!`,
-//       );
-//     }
-
-//     return plainToInstance(CompanyResponseDto, {
-//       ...company,
-//       hr_contact: {
-//         name: company.user?.username,
-//         email: company.user?.email,
-//       },
-//     });
-//   }
-// }
-// src/companies/companies.service.ts
 import {
   Injectable,
   NotFoundException,
@@ -154,7 +12,6 @@ import { Technology } from './entities/technology.entity';
 import { CompanyTechStack } from './entities/company-tech-stack.entity';
 import { OfficeLocation } from './entities/office-location.entity';
 import { OfficeImage } from './entities/office-image.entity';
-import { JobBenefit } from './entities/job-benefit.entity';
 import { CompanyDocument } from './entities/company-document.entity';
 import { Job } from './entities/job.entity';
 import { JobApplication } from './entities/job-application.entity';
@@ -167,8 +24,6 @@ import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { CreateOfficeLocationDto } from './dto/create-office-location.dto';
 import { UpdateOfficeLocationDto } from './dto/update-office-location.dto';
-import { CreateJobBenefitDto } from './dto/create-job-benefit.dto';
-import { UpdateJobBenefitDto } from './dto/update-job-benefit.dto';
 import { CreateOfficeImageDto } from './dto/create-office-image.dto';
 import { UpdateOfficeImageDto } from './dto/update-office-image.dto';
 import { CreateCompanyDocumentDto } from './dto/create-document.dto';
@@ -178,7 +33,6 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { UpdateApplicationStatusDto } from './dto/update-application-status.dto';
 import { ScheduleInterviewDto } from './dto/schedule-interview.dto';
 import { SendNotificationDto } from './dto/send-notification.dto';
-import { log } from 'console';
 
 @Injectable()
 export class CompaniesService {
@@ -195,8 +49,6 @@ export class CompaniesService {
     private officeLocationRepository: Repository<OfficeLocation>,
     @InjectRepository(OfficeImage)
     private officeImageRepository: Repository<OfficeImage>,
-    @InjectRepository(JobBenefit)
-    private jobBenefitRepository: Repository<JobBenefit>,
     @InjectRepository(CompanyDocument)
     private companyDocumentRepository: Repository<CompanyDocument>,
     @InjectRepository(Job)
@@ -287,7 +139,6 @@ export class CompaniesService {
         'technologies',
         'officeLocations',
         'officeLocations.images',
-        'benefits',
         'documents',
         'jobs',
       ],
@@ -354,7 +205,6 @@ export class CompaniesService {
         'technologies',
         'officeLocations',
         'officeLocations.images',
-        'benefits',
         'documents',
         'jobs',
       ],
@@ -428,8 +278,8 @@ export class CompaniesService {
       .leftJoinAndSelect('company.technologies', 'technologies')
       .leftJoinAndSelect('company.officeLocations', 'officeLocations')
       .leftJoinAndSelect('officeLocations.images', 'images')
-      .leftJoinAndSelect('company.benefits', 'benefits')
-      .leftJoinAndSelect('company.documents', 'documents');
+      .leftJoinAndSelect('company.documents', 'documents')
+      .leftJoinAndSelect('company.jobs', 'jobs');
     if (industry)
       query.andWhere('company.industry LIKE :industry', {
         industry: `%${industry}%`,
@@ -494,6 +344,7 @@ export class CompaniesService {
       { isActive: false },
     );
   }
+
   async addMember(
     userId: string,
     createMemberDto: CreateMemberDto,
@@ -837,107 +688,6 @@ export class CompaniesService {
     await this.officeImageRepository.delete(imageId);
   }
 
-  async addJobBenefit(
-    userId: string,
-    createJobBenefitDto: CreateJobBenefitDto,
-    file?: Express.Multer.File,
-  ): Promise<JobBenefit> {
-    const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
-    });
-    if (!company) throw new NotFoundException('Company not found');
-    if (
-      file &&
-      (!['image/png', 'image/jpeg'].includes(file.mimetype) ||
-        file.size > 2 * 1024 * 1024)
-    ) {
-      throw new BadRequestException('Invalid icon format or size exceeds 2MB');
-    }
-    const icon = file
-      ? (await this.filesService.uploadFile(file)).originalPath
-      : createJobBenefitDto.icon;
-    const benefit = this.jobBenefitRepository.create({
-      company,
-      company_id: company.id,
-      ...createJobBenefitDto,
-      icon,
-    });
-    const savedBenefit = await this.jobBenefitRepository.save(benefit);
-    if (icon) {
-      savedBenefit['icon_thumbnail'] = await this.filesService.getFileUrl(
-        icon.split('/').pop() ?? '',
-        'thumbnail',
-      );
-    }
-    return savedBenefit;
-  }
-
-  async getJobBenefits(userId: string): Promise<JobBenefit[]> {
-    const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
-    });
-    if (!company) throw new NotFoundException('Company not found');
-    const benefits = await this.jobBenefitRepository.find({
-      where: { company_id: company.id },
-    });
-    for (const benefit of benefits) {
-      if (benefit.icon) {
-        benefit['icon_thumbnail'] = await this.filesService.getFileUrl(
-          benefit.icon.split('/').pop() ?? '',
-          'thumbnail',
-        );
-      }
-    }
-    return benefits;
-  }
-
-  async updateJobBenefit(
-    userId: string,
-    benefitId: number,
-    updateJobBenefitDto: UpdateJobBenefitDto,
-    file?: Express.Multer.File,
-  ): Promise<JobBenefit> {
-    const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
-    });
-    if (!company) throw new NotFoundException('Company not found');
-    const benefit = await this.jobBenefitRepository.findOne({
-      where: { id: benefitId, company_id: company.id },
-    });
-    if (!benefit) throw new NotFoundException('Job benefit not found');
-    if (
-      file &&
-      (!['image/png', 'image/jpeg'].includes(file.mimetype) ||
-        file.size > 2 * 1024 * 1024)
-    ) {
-      throw new BadRequestException('Invalid icon format or size exceeds 2MB');
-    }
-    const icon = file
-      ? (await this.filesService.uploadFile(file)).originalPath
-      : benefit.icon;
-    Object.assign(benefit, { ...updateJobBenefitDto, icon });
-    const savedBenefit = await this.jobBenefitRepository.save(benefit);
-    if (icon) {
-      savedBenefit['icon_thumbnail'] = await this.filesService.getFileUrl(
-        icon.split('/').pop() ?? '',
-        'thumbnail',
-      );
-    }
-    return savedBenefit;
-  }
-
-  async deleteJobBenefit(userId: string, benefitId: number): Promise<void> {
-    const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
-    });
-    if (!company) throw new NotFoundException('Company not found');
-    const benefit = await this.jobBenefitRepository.findOne({
-      where: { id: benefitId, company_id: company.id },
-    });
-    if (!benefit) throw new NotFoundException('Job benefit not found');
-    await this.jobBenefitRepository.delete(benefitId);
-  }
-
   async addCompanyDocument(
     userId: string,
     createCompanyDocumentDto: CreateCompanyDocumentDto,
@@ -1046,10 +796,11 @@ export class CompaniesService {
       where: { user_id: userId },
     });
     if (!company) throw new NotFoundException('Company not found');
+
     const job = this.jobRepository.create({
-      company,
       company_id: company.id,
       ...createJobDto,
+      created_by: company.user_id,
     });
     return this.jobRepository.save(job);
   }

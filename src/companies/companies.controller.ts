@@ -65,7 +65,7 @@ import {
   UseGuards,
   UploadedFile,
   UseInterceptors,
-  Req,
+  Request,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
@@ -87,7 +87,6 @@ import { ScheduleInterviewDto } from './dto/schedule-interview.dto';
 import { SendNotificationDto } from './dto/send-notification.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { log } from 'console';
 
 @Controller('companies')
 export class CompaniesController {
@@ -95,14 +94,19 @@ export class CompaniesController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  createCompany(@Body() createCompanyDto: CreateCompanyDto, @Req() req: any) {
+  createCompany(
+    @Body() createCompanyDto: CreateCompanyDto,
+    @Request() req: any,
+  ) {
     return this.companiesService.createCompany(req.user.id, createCompanyDto);
   }
- 
 
   @Put()
   @UseGuards(JwtAuthGuard)
-  updateCompany(@Body() updateCompanyDto: UpdateCompanyDto, @Req() req: any) {
+  updateCompany(
+    @Body() updateCompanyDto: UpdateCompanyDto,
+    @Request() req: any,
+  ) {
     return this.companiesService.updateCompany(req.user.id, updateCompanyDto);
   }
 
@@ -112,7 +116,7 @@ export class CompaniesController {
   uploadCompanyMedia(
     @Param('type') type: 'logo' | 'image',
     @UploadedFile() file: Express.Multer.File,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.uploadCompanyMedia(req.user.id, file, type);
   }
@@ -132,7 +136,7 @@ export class CompaniesController {
 
   @Get('profile')
   @UseGuards(JwtAuthGuard)
-  getCompany(@Req() req: any) {
+  getCompany(@Request() req: any) {
     return this.companiesService.getCompany(req.user.id);
   }
   @Get('/:id')
@@ -143,7 +147,7 @@ export class CompaniesController {
 
   @Delete()
   @UseGuards(JwtAuthGuard)
-  deleteCompany(@Req() req: any) {
+  deleteCompany(@Request() req: any) {
     return this.companiesService.deleteCompany(req.user.id);
   }
 
@@ -153,14 +157,14 @@ export class CompaniesController {
   addMember(
     @Body() createMemberDto: CreateMemberDto,
     @UploadedFile() file: Express.Multer.File,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.addMember(req.user.id, createMemberDto, file);
   }
 
   @Get('members')
   @UseGuards(JwtAuthGuard)
-  getMembers(@Req() req: any) {
+  getMembers(@Request() req: any) {
     return this.companiesService.getMembers(req.user.id);
   }
 
@@ -171,7 +175,7 @@ export class CompaniesController {
     @Param('memberId') memberId: string,
     @Body() updateMemberDto: UpdateMemberDto,
     @UploadedFile() file: Express.Multer.File,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.updateMember(
       req.user.id,
@@ -183,19 +187,22 @@ export class CompaniesController {
 
   @Delete('members/:memberId')
   @UseGuards(JwtAuthGuard)
-  deleteMember(@Param('memberId') memberId: string, @Req() req: any) {
+  deleteMember(@Param('memberId') memberId: string, @Request() req: any) {
     return this.companiesService.deleteMember(req.user.id, +memberId);
   }
 
   @Post('tech-stack')
   @UseGuards(JwtAuthGuard)
-  addTechStack(@Body('technologyId') technologyId: number, @Req() req: any) {
+  addTechStack(
+    @Body('technologyId') technologyId: number,
+    @Request() req: any,
+  ) {
     return this.companiesService.addTechStack(req.user.id, technologyId);
   }
 
   @Get('tech-stack')
   @UseGuards(JwtAuthGuard)
-  getTechStack(@Req() req: any) {
+  getTechStack(@Request() req: any) {
     return this.companiesService.getTechStack(req.user.id);
   }
 
@@ -203,7 +210,7 @@ export class CompaniesController {
   @UseGuards(JwtAuthGuard)
   deleteTechStack(
     @Param('technologyId') technologyId: string,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.deleteTechStack(req.user.id, +technologyId);
   }
@@ -212,7 +219,7 @@ export class CompaniesController {
   @UseGuards(JwtAuthGuard)
   addOfficeLocation(
     @Body() createOfficeLocationDto: CreateOfficeLocationDto,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.addOfficeLocation(
       req.user.id,
@@ -222,7 +229,7 @@ export class CompaniesController {
 
   @Get('office-locations')
   @UseGuards(JwtAuthGuard)
-  getOfficeLocations(@Req() req: any) {
+  getOfficeLocations(@Request() req: any) {
     return this.companiesService.getOfficeLocations(req.user.id);
   }
 
@@ -231,7 +238,7 @@ export class CompaniesController {
   updateOfficeLocation(
     @Param('locationId') locationId: string,
     @Body() updateOfficeLocationDto: UpdateOfficeLocationDto,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.updateOfficeLocation(
       req.user.id,
@@ -244,7 +251,7 @@ export class CompaniesController {
   @UseGuards(JwtAuthGuard)
   deleteOfficeLocation(
     @Param('locationId') locationId: string,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.deleteOfficeLocation(req.user.id, +locationId);
   }
@@ -256,7 +263,7 @@ export class CompaniesController {
     @Param('locationId') locationId: string,
     @Body() createOfficeImageDto: CreateOfficeImageDto,
     @UploadedFile() file: Express.Multer.File,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.addOfficeImage(
       req.user.id,
@@ -268,7 +275,10 @@ export class CompaniesController {
 
   @Get('office-locations/:locationId/images')
   @UseGuards(JwtAuthGuard)
-  getOfficeImages(@Param('locationId') locationId: string, @Req() req: any) {
+  getOfficeImages(
+    @Param('locationId') locationId: string,
+    @Request() req: any,
+  ) {
     return this.companiesService.getOfficeImages(req.user.id, +locationId);
   }
 
@@ -280,7 +290,7 @@ export class CompaniesController {
     @Param('imageId') imageId: string,
     @Body() updateOfficeImageDto: UpdateOfficeImageDto,
     @UploadedFile() file: Express.Multer.File,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.updateOfficeImage(
       req.user.id,
@@ -296,7 +306,7 @@ export class CompaniesController {
   deleteOfficeImage(
     @Param('locationId') locationId: string,
     @Param('imageId') imageId: string,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.deleteOfficeImage(
       req.user.id,
@@ -305,57 +315,13 @@ export class CompaniesController {
     );
   }
 
-  @Post('benefits')
-  @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('icon'))
-  addJobBenefit(
-    @Body() createJobBenefitDto: CreateJobBenefitDto,
-    @UploadedFile() file: Express.Multer.File,
-    @Req() req: any,
-  ) {
-    return this.companiesService.addJobBenefit(
-      req.user.id,
-      createJobBenefitDto,
-      file,
-    );
-  }
-
-  @Get('benefits')
-  @UseGuards(JwtAuthGuard)
-  getJobBenefits(@Req() req: any) {
-    return this.companiesService.getJobBenefits(req.user.id);
-  }
-
-  @Put('benefits/:benefitId')
-  @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('icon'))
-  updateJobBenefit(
-    @Param('benefitId') benefitId: string,
-    @Body() updateJobBenefitDto: UpdateJobBenefitDto,
-    @UploadedFile() file: Express.Multer.File,
-    @Req() req: any,
-  ) {
-    return this.companiesService.updateJobBenefit(
-      req.user.id,
-      +benefitId,
-      updateJobBenefitDto,
-      file,
-    );
-  }
-
-  @Delete('benefits/:benefitId')
-  @UseGuards(JwtAuthGuard)
-  deleteJobBenefit(@Param('benefitId') benefitId: string, @Req() req: any) {
-    return this.companiesService.deleteJobBenefit(req.user.id, +benefitId);
-  }
-
   @Post('documents')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   addCompanyDocument(
     @Body() createCompanyDocumentDto: CreateCompanyDocumentDto,
     @UploadedFile() file: Express.Multer.File,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.addCompanyDocument(
       req.user.id,
@@ -366,7 +332,7 @@ export class CompaniesController {
 
   @Get('documents')
   @UseGuards(JwtAuthGuard)
-  getCompanyDocuments(@Req() req: any) {
+  getCompanyDocuments(@Request() req: any) {
     return this.companiesService.getCompanyDocuments(req.user.id);
   }
 
@@ -377,7 +343,7 @@ export class CompaniesController {
     @Param('id') id: string,
     @Body() updateCompanyDocumentDto: UpdateCompanyDocumentDto,
     @UploadedFile() file: Express.Multer.File,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.updateCompanyDocument(
       req.user.id,
@@ -389,13 +355,13 @@ export class CompaniesController {
 
   @Delete('documents/:id')
   @UseGuards(JwtAuthGuard)
-  deleteCompanyDocument(@Param('id') id: string, @Req() req: any) {
+  deleteCompanyDocument(@Param('id') id: string, @Request() req: any) {
     return this.companiesService.deleteCompanyDocument(req.user.id, +id);
   }
 
   @Post('jobs')
   @UseGuards(JwtAuthGuard)
-  createJob(@Body() createJobDto: CreateJobDto, @Req() req: any) {
+  createJob(@Body() createJobDto: CreateJobDto, @Request() req: any) {
     return this.companiesService.createJob(req.user.id, createJobDto);
   }
 
@@ -404,14 +370,14 @@ export class CompaniesController {
   updateJob(
     @Param('jobId') jobId: string,
     @Body() updateJobDto: UpdateJobDto,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.updateJob(req.user.id, +jobId, updateJobDto);
   }
 
   @Delete('jobs/:jobId')
   @UseGuards(JwtAuthGuard)
-  deleteJob(@Param('jobId') jobId: string, @Req() req: any) {
+  deleteJob(@Param('jobId') jobId: string, @Request() req: any) {
     return this.companiesService.deleteJob(req.user.id, +jobId);
   }
 
@@ -420,7 +386,7 @@ export class CompaniesController {
   getJobs(
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.getJobs(req.user.id, +page || 1, +limit || 10);
   }
@@ -432,7 +398,7 @@ export class CompaniesController {
     @Query('status') status: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.getJobApplications(
       req.user.id,
@@ -448,7 +414,7 @@ export class CompaniesController {
   updateApplicationStatus(
     @Param('applicationId') applicationId: string,
     @Body() updateApplicationStatusDto: UpdateApplicationStatusDto,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.updateApplicationStatus(
       req.user.id,
@@ -462,7 +428,7 @@ export class CompaniesController {
   scheduleInterview(
     @Param('applicationId') applicationId: string,
     @Body() scheduleInterviewDto: ScheduleInterviewDto,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.scheduleInterview(
       req.user.id,
@@ -478,7 +444,7 @@ export class CompaniesController {
     @Query('status') status: string,
     @Query('page') page: string,
     @Query('limit') limit: string,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.getInterviews(
       req.user.id,
@@ -494,7 +460,7 @@ export class CompaniesController {
   updateInterviewStatus(
     @Param('interviewId') interviewId: string,
     @Body('status') status: string,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.updateInterviewStatus(
       req.user.id,
@@ -507,7 +473,7 @@ export class CompaniesController {
   @UseGuards(JwtAuthGuard)
   sendNotification(
     @Body() sendNotificationDto: SendNotificationDto,
-    @Req() req: any,
+    @Request() req: any,
   ) {
     return this.companiesService.sendNotification(
       req.user.id,
@@ -517,7 +483,7 @@ export class CompaniesController {
 
   @Get('analytics')
   @UseGuards(JwtAuthGuard)
-  getAnalytics(@Query('jobId') jobId: string, @Req() req: any) {
+  getAnalytics(@Query('jobId') jobId: string, @Request() req: any) {
     return this.companiesService.getAnalytics(
       req.user.id,
       jobId ? +jobId : undefined,

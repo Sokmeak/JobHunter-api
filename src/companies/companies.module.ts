@@ -10,7 +10,7 @@ import { Technology } from './entities/technology.entity';
 import { CompanyTechStack } from './entities/company-tech-stack.entity';
 import { OfficeLocation } from './entities/office-location.entity';
 import { OfficeImage } from './entities/office-image.entity';
-import { JobBenefit } from './entities/job-benefit.entity';
+
 import { CompanyDocument } from './entities/company-document.entity';
 import { Job } from './entities/job.entity';
 import { JobApplication } from './entities/job-application.entity';
@@ -29,7 +29,7 @@ import { Role } from 'src/roles/entities/role.entity';
       CompanyTechStack,
       OfficeLocation,
       OfficeImage,
-      JobBenefit,
+ 
       CompanyDocument,
       Job,
       JobApplication,

@@ -105,9 +105,7 @@ export class AuthService {
         headquarters_location: '',
         isActive: true,
         isVerified: false,
-        brand_logo: ''
-      
-        
+        brand_logo: '',
       };
       await this.companyService.createCompany(String(user.id), companyData);
     }
