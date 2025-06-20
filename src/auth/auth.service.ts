@@ -19,6 +19,8 @@ import { BcryptProvider } from 'src/users/bcrypt.provider';
 import { CompaniesService } from 'src/companies/companies.service';
 import { CreateCompanyDto } from 'src/companies/dto/create-company.dto';
 import { stringify } from 'querystring';
+import { CreateJobSeekerDto } from 'src/jobseekers/dto/create-jobseeker.dto';
+import { JobSeekersService } from 'src/jobseekers/jobseekers.service';
 // import { Role } from 'src/roles/entities/role.entity';
 // import { InjectRepository } from '@nestjs/typeorm';
 // import { Repository } from 'typeorm';
@@ -32,6 +34,7 @@ export class AuthService {
     private roleService: RolesService,
     private bcryptProvider: BcryptProvider,
     private companyService: CompaniesService,
+    private jobSeekerService: JobSeekersService,
   ) {}
 
   logger = new Logger(AppModule.name);
@@ -84,6 +87,26 @@ export class AuthService {
     console.log('userDtoWithRole', userDtoWithRole);
 
     const user = await this.userService.create(userDtoWithRole);
+
+    // Assume you already have a `user` object after user creation
+    if (userDto.role === 'JOB SEEKER') {
+      const jobSeekerData: CreateJobSeekerDto = {
+        userId: user.id,
+        jobseeker_email: user.username,
+        jobseeker_name: user.email,
+        profile_image: '', // or null / undefined (optional)
+        headline: 'Aspiring professional seeking new opportunities',
+        bio: 'I am a passionate individual looking to grow in a dynamic company.',
+        current_status: 'Open to work',
+        preferred_location: 'Phnom Penh',
+        expected_salary: 500, // or leave it undefined if not known
+      };
+
+      console.log('jobSeekerData', jobSeekerData);
+
+      // Example: save to database using your service
+      await this.jobSeekerService.createJobSeeker(user.id, jobSeekerData);
+    }
 
     // If employer, create company
     if (userDto.role === 'EMPLOYER') {

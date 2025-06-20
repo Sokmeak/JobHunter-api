@@ -1,21 +1,19 @@
 // interview-invitation.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { JobSeeker } from '../entities/jobseeker.entity';
-import { Job } from '../jobs/job.entity';
+import { Entity, Column, ManyToOne } from 'typeorm';
+import { JobSeeker } from './jobseeker.entity';
+import { Job } from './job.entity';
 import { Company } from 'src/companies/entities/company.entity';
 import { BaseEntity } from 'src/database/base.entity';
 
 @Entity('interview_invitations')
-export class InterviewInvitation  extends BaseEntity{
- 
-
+export class InterviewInvitation extends BaseEntity {
   @ManyToOne(() => JobSeeker, (jobSeeker) => jobSeeker.interviewInvitations, {
     onDelete: 'CASCADE',
   })
   jobSeeker: JobSeeker;
 
   @Column()
-  job_seeker_id: string;
+   job_seeker_id: number;
 
   @ManyToOne(() => Job, { onDelete: 'CASCADE' })
   job: Job;

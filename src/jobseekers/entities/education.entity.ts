@@ -12,7 +12,7 @@ export class EducationHistory extends BaseEntity {
   jobSeeker: JobSeeker;
 
   @Column()
-  job_seeker_id: string;
+    job_seeker_id: number;
 
   @Column()
   institution_name: string;

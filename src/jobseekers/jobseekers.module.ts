@@ -3,20 +3,21 @@ import { JobSeekersController } from './jobseekers.controller';
 import { JobSeekersService } from './jobseekers.service';
 import { ConfigModule } from '@nestjs/config';
 import { Company } from 'src/companies/entities/company.entity';
-import { Job } from './jobs/job.entity';
-import { JobAlert } from './job-alert/job-alert.entity';
-import { InterviewInvitation } from './interview-invitation/interview-invitation.entity';
-import { SkillTag } from './skill/skill.entity';
-import { Notification } from './notification/notification.entity';
-import { WorkExperience } from './experience/experience.entity';
-import { EducationHistory } from './education/education.entity';
-import { InterviewPreference } from './interview-preference/interview-preference.entity';
-import { SavedJob } from './save-job/saved-job.entity';
-import { JobApplication } from './application/application.entity';
-import { Resume } from './resume/resume.entity';
+import { Job } from './entities/job.entity';
+import { JobAlert } from './entities/job-alert.entity';
+import { InterviewInvitation } from './entities/interview-invitation.entity';
+import { SkillTag } from './entities/skill.entity';
+import { Notification_Applicant } from './entities/notification.entity';
+import { WorkExperience } from './entities/experience.entity';
+import { EducationHistory } from './entities/education.entity';
+import { InterviewPreference } from './entities/interview-preference.entity';
+import { Resume } from './entities/resume.entity';
 import { JobSeeker } from './entities/jobseeker.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FilesService } from 'src/files/files.service';
+import { SavedJob } from './entities/saved-job.entity';
+import { JobApplication } from './entities/application.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -29,17 +30,16 @@ import { FilesService } from 'src/files/files.service';
       EducationHistory,
       WorkExperience,
       SkillTag,
-      Notification,
+      Notification_Applicant,
       InterviewInvitation,
       JobAlert,
       Job,
       Company,
     ]),
-
     ConfigModule,
   ],
-
   controllers: [JobSeekersController],
-  providers: [JobSeekersService, FilesService],
+  providers: [JobSeekersService, FilesService, JwtService],
+  exports: [JobSeekersService],
 })
 export class JobSeekersModule {}

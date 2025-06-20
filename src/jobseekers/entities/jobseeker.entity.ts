@@ -6,27 +6,36 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
-import { JobApplication } from '../application/application.entity';
-import { EducationHistory } from '../education/education.entity';
-import { WorkExperience } from '../experience/experience.entity';
-import { SkillTag } from '../skill/skill.entity';
-import { InterviewInvitation } from '../interview-invitation/interview-invitation.entity';
-import { JobAlert } from '../job-alert/job-alert.entity';
-import { Resume } from '../resume/resume.entity';
-import { InterviewPreference } from '../interview-preference/interview-preference.entity';
-import { SavedJob } from '../save-job/saved-job.entity';
+import { EducationHistory } from './education.entity';
+import { WorkExperience } from './experience.entity';
+import { SkillTag } from './skill.entity';
+import { InterviewInvitation } from './interview-invitation.entity';
+import { JobAlert } from './job-alert.entity';
+import { InterviewPreference } from './interview-preference.entity';
 import { BaseEntity } from 'src/database/base.entity';
+import { Resume } from './resume.entity';
+import { SavedJob } from './saved-job.entity';
+import { JobApplication } from './application.entity';
 
 @Entity('job_seekers')
 export class JobSeeker extends BaseEntity {
-  
+  constructor(partial?: Partial<JobSeeker>) {
+    super();
+    Object.assign(this, partial);
+  }
 
   @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
   @Column()
-  user_id: string;
+  jobseeker_name: string;
+
+  @Column()
+  jobseeker_email: string;
+
+  @Column()
+  user_id: number;
 
   @Column({ nullable: true })
   profile_image: string;
@@ -62,6 +71,7 @@ export class JobSeeker extends BaseEntity {
   @OneToOne(() => InterviewPreference, (preference) => preference.jobSeeker, {
     cascade: true,
   })
+  @JoinColumn({ name: 'jobseeker_id' })
   interviewPreference: InterviewPreference;
 
   @OneToMany(() => EducationHistory, (education) => education.jobSeeker, {

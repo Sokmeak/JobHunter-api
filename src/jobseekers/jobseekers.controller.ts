@@ -8,21 +8,26 @@ import {
   UseInterceptors,
   UploadedFile,
   Request,
+  Delete,
+  UseGuards,
 } from '@nestjs/common';
-
-import * as multer from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as multer from 'multer'; // Ensure this import works
+import { Express } from 'express';
 import { JobSeekersService } from './jobseekers.service';
 import { CreateJobSeekerDto } from './dto/create-jobseeker.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { CreateResumeDto } from './resume/dto/create-resume.dto';
-import { CreateJobApplicationDto } from './application/dto/create-job-application.dto';
-import { CreateSavedJobDto } from './jobs/dto/create-saved-job.dto';
-import { CreateInterviewPreferenceDto } from './interview-preference/dto/create-interview-preference.dto';
-import { UpdateInterviewInvitationDto } from './interview-invitation/dto/update-interview-invitation.dto';
-import { CreateEducationHistoryDto } from './education/dto/create-education.dto';
-import { CreateWorkExperienceDto } from './experience/dto/create-experience.dto';
-import { CreateSkillTagDto } from './skill/dto/create-skill.dto';
-import { CreateJobAlertDto } from './job-alert/dto/create-job-alert.dto';
+import { CreateResumeDto } from './dto/create-resume.dto';
+import { CreateJobApplicationDto } from './dto/create-job-application.dto';
+import { CreateSavedJobDto } from './dto/create-saved-job.dto';
+import { CreateInterviewPreferenceDto } from './dto/create-interview-preference.dto';
+import { UpdateInterviewInvitationDto } from './dto/update-interview-invitation.dto';
+import { CreateEducationHistoryDto } from './dto/create-education.dto';
+import { CreateWorkExperienceDto } from './dto/create-experience.dto';
+import { CreateSkillTagDto } from './dto/create-skill.dto';
+import { CreateJobAlertDto } from './dto/create-job-alert.dto';
+import { AuthenticationGuard } from 'src/auth/guards/authentication/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/role.guard';
+import { log } from 'console';
 
 @Controller('job-seekers')
 export class JobSeekersController {
@@ -42,18 +47,18 @@ export class JobSeekersController {
   @Patch('profile')
   updateProfile(
     @Request() req,
-    @Body() updateJobSeekerDto: CreateJobSeekerDto,
+    @Body() createJobSeekerDto: CreateJobSeekerDto,
   ) {
     return this.jobSeekersService.updateJobSeeker(
       req.user.id,
-      updateJobSeekerDto,
+      createJobSeekerDto,
     );
   }
 
   @Post('profile-image')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: multer.memoryStorage(),
+      storage: multer.memoryStorage(), // Fixed import should resolve this
       limits: { fileSize: 10 * 1024 * 1024 },
     }),
   )
@@ -65,7 +70,9 @@ export class JobSeekersController {
   }
 
   @Get('profile')
+  @UseGuards(AuthenticationGuard, RolesGuard)
   getProfile(@Request() req) {
+    log(req.user.id);
     return this.jobSeekersService.getJobSeeker(req.user.id);
   }
 
@@ -86,6 +93,11 @@ export class JobSeekersController {
       file,
       createResumeDto,
     );
+  }
+
+  @Delete('resumes/:id')
+  deleteResume(@Request() req, @Param('id') resumeId: number) {
+    return this.jobSeekersService.deleteResume(req.user.id, resumeId);
   }
 
   @Post('applications')
@@ -152,6 +164,27 @@ export class JobSeekersController {
     );
   }
 
+  @Patch('education-history/:id')
+  updateEducationHistory(
+    @Request() req,
+    @Param('id') educationId: number,
+    @Body() createEducationHistoryDto: CreateEducationHistoryDto,
+  ) {
+    return this.jobSeekersService.updateEducationHistory(
+      req.user.id,
+      educationId,
+      createEducationHistoryDto,
+    );
+  }
+
+  @Delete('education-history/:id')
+  deleteEducationHistory(@Request() req, @Param('id') educationId: number) {
+    return this.jobSeekersService.deleteEducationHistory(
+      req.user.id,
+      educationId,
+    );
+  }
+
   @Post('work-experience')
   addWorkExperience(
     @Request() req,
@@ -163,9 +196,35 @@ export class JobSeekersController {
     );
   }
 
+  @Patch('work-experience/:id')
+  updateWorkExperience(
+    @Request() req,
+    @Param('id') experienceId: string,
+    @Body() createWorkExperienceDto: CreateWorkExperienceDto,
+  ) {
+    return this.jobSeekersService.updateWorkExperience(
+      req.user.id,
+      experienceId,
+      createWorkExperienceDto,
+    );
+  }
+
+  @Delete('work-experience/:id')
+  deleteWorkExperience(@Request() req, @Param('id') experienceId: string) {
+    return this.jobSeekersService.deleteWorkExperience(
+      req.user.id,
+      experienceId,
+    );
+  }
+
   @Post('skill-tags')
   addSkillTag(@Request() req, @Body() createSkillTagDto: CreateSkillTagDto) {
     return this.jobSeekersService.addSkillTag(req.user.id, createSkillTagDto);
+  }
+
+  @Delete('skill-tags/:id')
+  deleteSkillTag(@Request() req, @Param('id') skillId: number) {
+    return this.jobSeekersService.deleteSkillTag(req.user.id, skillId);
   }
 
   @Get('notifications')
@@ -180,26 +239,6 @@ export class JobSeekersController {
       notificationId,
     );
   }
-
-  // @Post('search-jobs')
-  // searchJobs(@Body() searchJobsDto: SearchJobsDto) {
-  //   return this.jobSeekersService.searchJobs(searchJobsDto);
-  // }
-
-  // @Get('job-recommendations')
-  // getJobRecommendations(@Request() req) {
-  //   return this.jobSeekersService.getJobRecommendations(req.user.id);
-  // }
-
-  // @Get('salary-insights')
-  // getSalaryInsights(@Query('industry') industry: string) {
-  //   return this.jobSeekersService.getSalaryInsights(industry);
-  // }
-
-  // @Get('company-reviews/:companyId')
-  // getCompanyReviews(@Param('companyId') companyId: string) {
-  //   return this.jobSeekersService.getCompanyReviews(companyId);
-  // }
 
   @Post('job-alerts')
   createJobAlert(@Request() req, @Body() createJobAlertDto: CreateJobAlertDto) {

@@ -12,7 +12,7 @@ export class SkillTag extends BaseEntity {
   jobSeeker: JobSeeker;
 
   @Column()
-  job_seeker_id: string;
+   job_seeker_id: number;
 
   @Column()
   skill_name: string;

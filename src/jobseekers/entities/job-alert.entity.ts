@@ -12,7 +12,7 @@ export class JobAlert extends BaseEntity {
   jobSeeker: JobSeeker;
 
   @Column()
-  job_seeker_id: string;
+  job_seeker_id:  number;
 
   @Column('simple-array', { nullable: true })
   keywords: string[];

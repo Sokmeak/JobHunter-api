@@ -7,29 +7,31 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FilesService } from '../files/files.service';
 import { JobSeeker } from './entities/jobseeker.entity';
-import { JobApplication } from './application/application.entity';
-import { EducationHistory } from './education/education.entity';
-import { SkillTag } from './skill/skill.entity';
-import { WorkExperience } from './experience/experience.entity';
-import { InterviewInvitation } from './interview-invitation/interview-invitation.entity';
-import { JobAlert } from './job-alert/job-alert.entity';
-import { Job } from './jobs/job.entity';
+import { EducationHistory } from './entities/education.entity';
+import { SkillTag } from './entities/skill.entity';
+import { WorkExperience } from './entities/experience.entity';
+import { InterviewInvitation } from './entities/interview-invitation.entity';
+import { JobAlert } from './entities/job-alert.entity';
+import { Job } from './entities/job.entity';
 import { Company } from 'src/companies/entities/company.entity';
 import { CreateJobSeekerDto } from './dto/create-jobseeker.dto';
-import { CreateJobApplicationDto } from './application/dto/create-job-application.dto';
-import { CreateSavedJobDto } from './jobs/dto/create-saved-job.dto';
-import { UpdateInterviewInvitationDto } from './interview-invitation/dto/update-interview-invitation.dto';
-import { CreateEducationHistoryDto } from './education/dto/create-education.dto';
-import { CreateWorkExperienceDto } from './experience/dto/create-experience.dto';
-import { CreateSkillTagDto } from './skill/dto/create-skill.dto';
-import { CreateJobAlertDto } from './job-alert/dto/create-job-alert.dto';
-import { Resume } from './resume/resume.entity';
-import { SavedJob } from './save-job/saved-job.entity';
-import { InterviewPreference } from './interview-preference/interview-preference.entity';
-import { CreateResumeDto } from './resume/dto/create-resume.dto';
-import { CreateInterviewPreferenceDto } from './interview-preference/dto/create-interview-preference.dto';
-import { CreateNotificationDto } from './notification/dto/create-notification.dto';
-import { Notification } from './notification/notification.entity';
+import { CreateJobApplicationDto } from './dto/create-job-application.dto';
+import { CreateSavedJobDto } from './dto/create-saved-job.dto';
+import { UpdateInterviewInvitationDto } from './dto/update-interview-invitation.dto';
+import { CreateEducationHistoryDto } from './dto/create-education.dto';
+import { CreateWorkExperienceDto } from './dto/create-experience.dto';
+import { CreateSkillTagDto } from './dto/create-skill.dto';
+import { CreateJobAlertDto } from './dto/create-job-alert.dto';
+import { Resume } from './entities/resume.entity';
+import { InterviewPreference } from './entities/interview-preference.entity';
+import { CreateResumeDto } from './dto/create-resume.dto';
+import { CreateInterviewPreferenceDto } from './dto/create-interview-preference.dto';
+import { CreateNotificationDto } from './dto/create-notification.dto';
+import { Notification_Applicant } from './entities/notification.entity';
+import { SavedJob } from './entities/saved-job.entity';
+import { JobApplication } from './entities/application.entity';
+import { Express } from 'express';
+import { log } from 'console';
 
 @Injectable()
 export class JobSeekersService {
@@ -50,8 +52,8 @@ export class JobSeekersService {
     private workExperienceRepository: Repository<WorkExperience>,
     @InjectRepository(SkillTag)
     private skillTagRepository: Repository<SkillTag>,
-    @InjectRepository(Notification)
-    private notificationRepository: Repository<Notification>,
+    @InjectRepository(Notification_Applicant)
+    private notificationRepository: Repository<Notification_Applicant>,
     @InjectRepository(InterviewInvitation)
     private interviewInvitationRepository: Repository<InterviewInvitation>,
     @InjectRepository(JobAlert)
@@ -64,18 +66,19 @@ export class JobSeekersService {
   ) {}
 
   async createJobSeeker(
-    userId: string,
+    userId: number,
     createJobSeekerDto: CreateJobSeekerDto,
   ): Promise<JobSeeker> {
     const jobSeeker = this.jobSeekerRepository.create({
       user_id: userId,
       ...createJobSeekerDto,
     });
+    log(jobSeeker);
     return this.jobSeekerRepository.save(jobSeeker);
   }
 
   async updateJobSeeker(
-    userId: string,
+    userId: number,
     updateJobSeekerDto: CreateJobSeekerDto,
   ): Promise<JobSeeker> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -87,7 +90,7 @@ export class JobSeekersService {
   }
 
   async uploadProfileImage(
-    userId: string,
+    userId: number,
     file: Express.Multer.File,
   ): Promise<JobSeeker> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -103,7 +106,8 @@ export class JobSeekersService {
     return savedJobSeeker;
   }
 
-  async getJobSeeker(userId: string): Promise<JobSeeker> {
+  async getJobSeeker(userId: number): Promise<JobSeeker> {
+    log('UserId' + userId);
     const jobSeeker = await this.jobSeekerRepository.findOne({
       where: { user_id: userId },
       relations: [
@@ -118,26 +122,27 @@ export class JobSeekersService {
         'jobAlerts',
       ],
     });
+
     if (!jobSeeker) throw new NotFoundException('Job seeker not found');
 
-    for (const resume of jobSeeker.resumes) {
-      const resumeFileName = resume.resume_url.split('/').pop() || '';
-      resume['thumbnail_url'] = await this.filesService.getFileUrl(
-        resumeFileName,
-        'thumbnail',
-      );
-    }
-    if (jobSeeker.profile_image) {
-      jobSeeker['profile_image_thumbnail'] = await this.filesService.getFileUrl(
-        jobSeeker.profile_image.split('/').pop() ?? '',
-        'thumbnail',
-      );
-    }
+    // for (const resume of jobSeeker.resumes) {
+    //   const resumeFileName = resume.resume_url.split('/').pop() || '';
+    //   resume['thumbnail_url'] = await this.filesService.getFileUrl(
+    //     resumeFileName,
+    //     'thumbnail',
+    //   );
+    // }
+    // if (jobSeeker.profile_image) {
+    //   jobSeeker['profile_image_thumbnail'] = await this.filesService.getFileUrl(
+    //     jobSeeker.profile_image.split('/').pop() ?? '',
+    //     'thumbnail',
+    //   );
+    // }
     return jobSeeker;
   }
 
   async uploadResume(
-    userId: string,
+    userId: number,
     file: Express.Multer.File,
     createResumeDto: CreateResumeDto,
   ): Promise<Resume> {
@@ -168,8 +173,19 @@ export class JobSeekersService {
     return savedResume;
   }
 
+  async deleteResume(userId: number, resumeId: number): Promise<void> {
+    const resume = await this.resumeRepository.findOne({
+      where: { id: +resumeId, job_seeker_id: userId },
+    });
+    if (!resume) throw new NotFoundException('Resume not found');
+    await this.filesService.deleteFile(
+      resume.resume_url.split('/').pop() ?? '',
+    );
+    await this.resumeRepository.delete(Number(resumeId));
+  }
+
   async applyForJob(
-    userId: string,
+    userId: number,
     createJobApplicationDto: CreateJobApplicationDto,
   ): Promise<JobApplication> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -211,7 +227,7 @@ export class JobSeekersService {
   }
 
   async getApplicationStatus(
-    userId: string,
+    userId: number,
     applicationId: string,
   ): Promise<JobApplication> {
     const application = await this.jobApplicationRepository.findOne({
@@ -223,7 +239,7 @@ export class JobSeekersService {
   }
 
   async saveJob(
-    userId: string,
+    userId: number,
     createSavedJobDto: CreateSavedJobDto,
   ): Promise<SavedJob> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -250,7 +266,7 @@ export class JobSeekersService {
   }
 
   async setInterviewPreference(
-    userId: string,
+    userId: number,
     createInterviewPreferenceDto: CreateInterviewPreferenceDto,
   ): Promise<InterviewPreference> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -273,7 +289,7 @@ export class JobSeekersService {
   }
 
   async getInterviewInvitations(
-    userId: string,
+    userId: number,
   ): Promise<InterviewInvitation[]> {
     return this.interviewInvitationRepository.find({
       where: { job_seeker_id: userId },
@@ -283,7 +299,7 @@ export class JobSeekersService {
   }
 
   async updateInterviewInvitation(
-    userId: string,
+    userId: number,
     invitationId: string,
     updateInterviewInvitationDto: UpdateInterviewInvitationDto,
   ): Promise<InterviewInvitation> {
@@ -316,7 +332,7 @@ export class JobSeekersService {
   }
 
   async addEducationHistory(
-    userId: string,
+    userId: number,
     createEducationHistoryDto: CreateEducationHistoryDto,
   ): Promise<EducationHistory> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -331,8 +347,32 @@ export class JobSeekersService {
     return this.educationHistoryRepository.save(education);
   }
 
+  async updateEducationHistory(
+    userId: number,
+    educationId: number,
+    createEducationHistoryDto: CreateEducationHistoryDto,
+  ): Promise<EducationHistory> {
+    const education = await this.educationHistoryRepository.findOne({
+      where: { id: educationId, job_seeker_id: userId },
+    });
+    if (!education) throw new NotFoundException('Education history not found');
+    Object.assign(education, createEducationHistoryDto);
+    return this.educationHistoryRepository.save(education);
+  }
+
+  async deleteEducationHistory(
+    userId: number,
+    educationId: number,
+  ): Promise<void> {
+    const education = await this.educationHistoryRepository.findOne({
+      where: { id: +educationId, job_seeker_id: userId },
+    });
+    if (!education) throw new NotFoundException('Education history not found');
+    await this.educationHistoryRepository.remove(education);
+  }
+
   async addWorkExperience(
-    userId: string,
+    userId: number,
     createWorkExperienceDto: CreateWorkExperienceDto,
   ): Promise<WorkExperience> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -347,8 +387,32 @@ export class JobSeekersService {
     return this.workExperienceRepository.save(experience);
   }
 
+  async updateWorkExperience(
+    userId: number,
+    experienceId: string,
+    createWorkExperienceDto: CreateWorkExperienceDto,
+  ): Promise<WorkExperience> {
+    const experience = await this.workExperienceRepository.findOne({
+      where: { id: +experienceId, job_seeker_id: userId },
+    });
+    if (!experience) throw new NotFoundException('Work experience not found');
+    Object.assign(experience, createWorkExperienceDto);
+    return this.workExperienceRepository.save(experience);
+  }
+
+  async deleteWorkExperience(
+    userId: number,
+    experienceId: string,
+  ): Promise<void> {
+    const experience = await this.workExperienceRepository.findOne({
+      where: { id: +experienceId, job_seeker_id: userId },
+    });
+    if (!experience) throw new NotFoundException('Work experience not found');
+    await this.workExperienceRepository.remove(experience);
+  }
+
   async addSkillTag(
-    userId: string,
+    userId: number,
     createSkillTagDto: CreateSkillTagDto,
   ): Promise<SkillTag> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -363,7 +427,15 @@ export class JobSeekersService {
     return this.skillTagRepository.save(skill);
   }
 
-  async getNotifications(userId: string): Promise<Notification[]> {
+  async deleteSkillTag(userId: number, skillId: number): Promise<void> {
+    const skill = await this.skillTagRepository.findOne({
+      where: { id: skillId, job_seeker_id: userId },
+    });
+    if (!skill) throw new NotFoundException('Skill tag not found');
+    await this.skillTagRepository.remove(skill);
+  }
+
+  async getNotifications(userId: string): Promise<Notification_Applicant[]> {
     return this.notificationRepository.find({
       where: { user_id: +userId },
     });
@@ -372,94 +444,21 @@ export class JobSeekersService {
   async markNotificationAsRead(
     userId: string,
     notificationId: string,
-  ): Promise<Notification> {
+  ): Promise<Notification_Applicant> {
     const checkTheExistingOne = await this.notificationRepository.findOne({
       where: {
         id: +notificationId,
         user_id: +userId,
       },
     });
-
-    // const checkTheExistingOne = await this.notificationRepository
-    //   .createQueryBuilder('notification')
-    //   .leftJoin('notification.user', 'user')
-    //   .where('notification.id = :notificationId', {
-    //     notificationId: +notificationId,
-    //   })
-    //   .andWhere('user.id = :userId', { userId: +userId })
-    //   .getOne();
-
     if (!checkTheExistingOne)
       throw new NotFoundException('Notification not found');
     checkTheExistingOne.is_read = true;
     return this.notificationRepository.save(checkTheExistingOne);
   }
 
-  // async searchJobs(searchJobsDto: SearchJobsDto): Promise<Job[] > {
-  //   const where: any = {};
-  //   if (searchJobsDto.location) {
-  //     where.location = Like(`%${searchJobsDto.location}%`);
-  //   }
-  //   if (searchJobsDto.min_salary || searchJobsDto.max_salary) {
-  //     where.salary_min = Between(searchJobsDto.min_salary || 0, searchJobsDto.max_salary || Number.MAX_SAFE_INTEGER);
-  //   }
-  //   if (searchJobsDto.job_type) {
-  //     where.job_type = searchJobsDto.job_type;
-  //   }
-  //   if (searchJobsDto.industry) {
-  //     where.industry = searchJobsDto.industry;
-  //   }
-  //   if (searchJobsDto.keywords && searchJobsDto.keywords.length > 0) {
-  //     where.required_skills = searchJobsDto.keywords.map((keyword) => Like(`%${keyword}%`));
-  //   }
-
-  //   return this.jobRepository.find({
-  //     where,
-  //     relations: ['company'],
-  //     order: { created_at: 'DESC' },
-  //   });
-  // }
-
-  // async getJobRecommendations(userId: string): Promise<Job[]> {
-  //   const jobSeeker = await this.jobSeekerRepository.findOne({
-  //     where: { user_id: userId },
-  //     relations: ['skillTags', 'workExperience'],
-  //   });
-  //   if (!jobSeeker) throw new NotFoundException('Job seeker not found');
-
-  //   const skills = jobSeeker.skillTags.map((tag) => tag.skill_name);
-  //   const experienceTitles = jobSeeker.workExperience.map((exp) => exp.job_title);
-
-  //   return this.jobRepository
-  //     .createQueryBuilder('job')
-  //     .leftJoinAndSelect('job.company', 'company')
-  //     .where('job.required_skills && :skills', { skills })
-  //     .orWhere('job.title ILIKE ANY (:titles)', { titles: experienceTitles.map((title) => `%${title}%`) })
-  //     .orderBy('job.created_at', 'DESC')
-  //     .limit(10)
-  //     .getMany();
-  // }
-
-  // async getSalaryInsights(industry: string): Promise<{ average_salary: number; job_count: number }> {
-  //   const jobs = await this.jobRepository.find({ where: { industry } });
-  //   if (jobs.length === 0) {
-  //     return { average_salary: 0, job_count: 0 };
-  //   }
-  //   const totalSalary = jobs.reduce((sum, job) => sum + (job.salary_min + job.salary_max) / 2, 0);
-  //   return {
-  //     average_salary: Math.round(totalSalary / jobs.length),
-  //     job_count: jobs.length,
-  //   };
-  // }
-
-  // async getCompanyReviews(companyId: string): Promise<string> {
-  //   const company = await this.companyRepository.findOne({ where: { id: companyId } });
-  //   if (!company) throw new NotFoundException('Company not found');
-  //   return company.reviews || 'No reviews available';
-  // }
-
   async createJobAlert(
-    userId: string,
+    userId: number,
     createJobAlertDto: CreateJobAlertDto,
   ): Promise<JobAlert> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -474,7 +473,7 @@ export class JobSeekersService {
     return this.jobAlertRepository.save(jobAlert);
   }
 
-  async getJobAlerts(userId: string): Promise<JobAlert[]> {
+  async getJobAlerts(userId: number): Promise<JobAlert[]> {
     return this.jobAlertRepository.find({
       where: { job_seeker_id: userId },
       order: { created_at: 'DESC' },

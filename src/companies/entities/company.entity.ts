@@ -105,3 +105,5 @@ export class Company extends BaseEntity {
   @OneToMany(() => Job, (job) => job.company, { cascade: true })
   jobs: Job[];
 }
+
+
