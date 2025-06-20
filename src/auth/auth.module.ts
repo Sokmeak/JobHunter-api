@@ -23,8 +23,20 @@ import { CompanyDocument } from 'src/companies/entities/company-document.entity'
 import { Job } from 'src/companies/entities/job.entity';
 import { JobApplication } from 'src/companies/entities/job-application.entity';
 import { Interview } from 'src/companies/entities/interview.entity';
-import { Notification } from 'src/jobseekers/notification/notification.entity';
+
 import { FilesService } from 'src/files/files.service';
+import { Notification_Applicant } from 'src/jobseekers/entities/notification.entity';
+import { JobSeekersService } from 'src/jobseekers/jobseekers.service';
+import { JobSeeker } from 'src/jobseekers/entities/jobseeker.entity';
+import { Resume } from 'src/jobseekers/entities/resume.entity';
+import { SavedJob } from 'src/jobseekers/entities/saved-job.entity';
+import { InterviewPreference } from 'src/jobseekers/entities/interview-preference.entity';
+import { EducationHistory } from 'src/jobseekers/entities/education.entity';
+import { WorkExperience } from 'src/jobseekers/entities/experience.entity';
+import { SkillTag } from 'src/jobseekers/entities/skill.entity';
+import { InterviewInvitation } from 'src/jobseekers/entities/interview-invitation.entity';
+import { JobAlert } from 'src/jobseekers/entities/job-alert.entity';
+import { Notification } from 'src/companies/entities/notification.entity';
 @Module({
   imports: [
     PassportModule,
@@ -42,6 +54,17 @@ import { FilesService } from 'src/files/files.service';
       JobApplication,
       Interview,
       Notification,
+      JobSeeker,
+      Resume,
+      JobApplication,
+      SavedJob,
+      InterviewPreference,
+      EducationHistory,
+      WorkExperience,
+      SkillTag,
+      Notification_Applicant,
+      InterviewInvitation,
+      JobAlert,
     ]), // This makes RoleRepository available
     forwardRef(() => UsersModule),
     JwtModule.register({
@@ -59,6 +82,7 @@ import { FilesService } from 'src/files/files.service';
     BcryptProvider,
     FilesService,
     RolesService,
+    JobSeekersService,
   ],
   exports: [AuthService, JwtModule],
 })

@@ -3,12 +3,12 @@ import { Role } from 'src/roles/entities/role.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 
-
 @Entity('notifications-applicant')
-export class Notification extends BaseEntity{
-
-
-  @ManyToOne(() => User, (user) => user.notifications,{ nullable: false, onDelete: 'CASCADE' })
+export class Notification_Applicant extends BaseEntity {
+  @ManyToOne(() => User, (user) => user.notifications, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
   user: User;
 

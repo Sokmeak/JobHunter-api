@@ -7,7 +7,7 @@ import { Job } from './entities/job.entity';
 import { JobAlert } from './entities/job-alert.entity';
 import { InterviewInvitation } from './entities/interview-invitation.entity';
 import { SkillTag } from './entities/skill.entity';
-import { Notification } from './entities/notification.entity';
+import { Notification_Applicant } from './entities/notification.entity';
 import { WorkExperience } from './entities/experience.entity';
 import { EducationHistory } from './entities/education.entity';
 import { InterviewPreference } from './entities/interview-preference.entity';
@@ -17,6 +17,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { FilesService } from 'src/files/files.service';
 import { SavedJob } from './entities/saved-job.entity';
 import { JobApplication } from './entities/application.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { JobApplication } from './entities/application.entity';
       EducationHistory,
       WorkExperience,
       SkillTag,
-      Notification,
+      Notification_Applicant,
       InterviewInvitation,
       JobAlert,
       Job,
@@ -38,6 +39,7 @@ import { JobApplication } from './entities/application.entity';
     ConfigModule,
   ],
   controllers: [JobSeekersController],
-  providers: [JobSeekersService, FilesService],
+  providers: [JobSeekersService, FilesService, JwtService],
+  exports: [JobSeekersService],
 })
 export class JobSeekersModule {}

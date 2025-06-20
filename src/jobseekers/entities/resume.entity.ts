@@ -10,7 +10,7 @@ export class Resume extends BaseEntity {
   jobSeeker: JobSeeker;
 
   @Column()
-  job_seeker_id: string;
+   job_seeker_id: number;
 
   @Column()
   resume_url: string;

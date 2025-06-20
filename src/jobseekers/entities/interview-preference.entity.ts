@@ -4,14 +4,13 @@ import { Entity, Column, OneToOne } from 'typeorm';
 
 @Entity('interview_preferences')
 export class InterviewPreference extends BaseEntity {
-
   @OneToOne(() => JobSeeker, (jobSeeker) => jobSeeker.interviewPreference, {
     onDelete: 'CASCADE',
   })
   jobSeeker: JobSeeker;
 
   @Column()
-  job_seeker_id: string;
+  job_seeker_id: number;
 
   @Column('simple-array', { nullable: true })
   available_days: string[];

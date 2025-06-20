@@ -27,10 +27,11 @@ import { InterviewPreference } from './entities/interview-preference.entity';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { CreateInterviewPreferenceDto } from './dto/create-interview-preference.dto';
 import { CreateNotificationDto } from './dto/create-notification.dto';
-import { Notification } from './entities/notification.entity';
+import { Notification_Applicant } from './entities/notification.entity';
 import { SavedJob } from './entities/saved-job.entity';
 import { JobApplication } from './entities/application.entity';
 import { Express } from 'express';
+import { log } from 'console';
 
 @Injectable()
 export class JobSeekersService {
@@ -51,8 +52,8 @@ export class JobSeekersService {
     private workExperienceRepository: Repository<WorkExperience>,
     @InjectRepository(SkillTag)
     private skillTagRepository: Repository<SkillTag>,
-    @InjectRepository(Notification)
-    private notificationRepository: Repository<Notification>,
+    @InjectRepository(Notification_Applicant)
+    private notificationRepository: Repository<Notification_Applicant>,
     @InjectRepository(InterviewInvitation)
     private interviewInvitationRepository: Repository<InterviewInvitation>,
     @InjectRepository(JobAlert)
@@ -65,18 +66,19 @@ export class JobSeekersService {
   ) {}
 
   async createJobSeeker(
-    userId: string,
+    userId: number,
     createJobSeekerDto: CreateJobSeekerDto,
   ): Promise<JobSeeker> {
     const jobSeeker = this.jobSeekerRepository.create({
       user_id: userId,
       ...createJobSeekerDto,
     });
+    log(jobSeeker);
     return this.jobSeekerRepository.save(jobSeeker);
   }
 
   async updateJobSeeker(
-    userId: string,
+    userId: number,
     updateJobSeekerDto: CreateJobSeekerDto,
   ): Promise<JobSeeker> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -88,7 +90,7 @@ export class JobSeekersService {
   }
 
   async uploadProfileImage(
-    userId: string,
+    userId: number,
     file: Express.Multer.File,
   ): Promise<JobSeeker> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -99,14 +101,13 @@ export class JobSeekersService {
     const uploadResult = await this.filesService.uploadFile(file);
     jobSeeker.profile_image = uploadResult.originalPath;
     const savedJobSeeker = await this.jobSeekerRepository.save(jobSeeker);
-    savedJobSeeker['profile_image_thumbnail'] = await this.filesService.getFileUrl(
-      uploadResult.fileName,
-      'thumbnail',
-    );
+    savedJobSeeker['profile_image_thumbnail'] =
+      await this.filesService.getFileUrl(uploadResult.fileName, 'thumbnail');
     return savedJobSeeker;
   }
 
-  async getJobSeeker(userId: string): Promise<JobSeeker> {
+  async getJobSeeker(userId: number): Promise<JobSeeker> {
+    log('UserId' + userId);
     const jobSeeker = await this.jobSeekerRepository.findOne({
       where: { user_id: userId },
       relations: [
@@ -121,26 +122,27 @@ export class JobSeekersService {
         'jobAlerts',
       ],
     });
+
     if (!jobSeeker) throw new NotFoundException('Job seeker not found');
 
-    for (const resume of jobSeeker.resumes) {
-      const resumeFileName = resume.resume_url.split('/').pop() || '';
-      resume['thumbnail_url'] = await this.filesService.getFileUrl(
-        resumeFileName,
-        'thumbnail',
-      );
-    }
-    if (jobSeeker.profile_image) {
-      jobSeeker['profile_image_thumbnail'] = await this.filesService.getFileUrl(
-        jobSeeker.profile_image.split('/').pop() ?? '',
-        'thumbnail',
-      );
-    }
+    // for (const resume of jobSeeker.resumes) {
+    //   const resumeFileName = resume.resume_url.split('/').pop() || '';
+    //   resume['thumbnail_url'] = await this.filesService.getFileUrl(
+    //     resumeFileName,
+    //     'thumbnail',
+    //   );
+    // }
+    // if (jobSeeker.profile_image) {
+    //   jobSeeker['profile_image_thumbnail'] = await this.filesService.getFileUrl(
+    //     jobSeeker.profile_image.split('/').pop() ?? '',
+    //     'thumbnail',
+    //   );
+    // }
     return jobSeeker;
   }
 
   async uploadResume(
-    userId: string,
+    userId: number,
     file: Express.Multer.File,
     createResumeDto: CreateResumeDto,
   ): Promise<Resume> {
@@ -171,7 +173,7 @@ export class JobSeekersService {
     return savedResume;
   }
 
-  async deleteResume(userId: string, resumeId: string): Promise<void> {
+  async deleteResume(userId: number, resumeId: number): Promise<void> {
     const resume = await this.resumeRepository.findOne({
       where: { id: +resumeId, job_seeker_id: userId },
     });
@@ -183,7 +185,7 @@ export class JobSeekersService {
   }
 
   async applyForJob(
-    userId: string,
+    userId: number,
     createJobApplicationDto: CreateJobApplicationDto,
   ): Promise<JobApplication> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -225,7 +227,7 @@ export class JobSeekersService {
   }
 
   async getApplicationStatus(
-    userId: string,
+    userId: number,
     applicationId: string,
   ): Promise<JobApplication> {
     const application = await this.jobApplicationRepository.findOne({
@@ -237,7 +239,7 @@ export class JobSeekersService {
   }
 
   async saveJob(
-    userId: string,
+    userId: number,
     createSavedJobDto: CreateSavedJobDto,
   ): Promise<SavedJob> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -264,7 +266,7 @@ export class JobSeekersService {
   }
 
   async setInterviewPreference(
-    userId: string,
+    userId: number,
     createInterviewPreferenceDto: CreateInterviewPreferenceDto,
   ): Promise<InterviewPreference> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -287,7 +289,7 @@ export class JobSeekersService {
   }
 
   async getInterviewInvitations(
-    userId: string,
+    userId: number,
   ): Promise<InterviewInvitation[]> {
     return this.interviewInvitationRepository.find({
       where: { job_seeker_id: userId },
@@ -297,7 +299,7 @@ export class JobSeekersService {
   }
 
   async updateInterviewInvitation(
-    userId: string,
+    userId: number,
     invitationId: string,
     updateInterviewInvitationDto: UpdateInterviewInvitationDto,
   ): Promise<InterviewInvitation> {
@@ -330,7 +332,7 @@ export class JobSeekersService {
   }
 
   async addEducationHistory(
-    userId: string,
+    userId: number,
     createEducationHistoryDto: CreateEducationHistoryDto,
   ): Promise<EducationHistory> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -346,19 +348,22 @@ export class JobSeekersService {
   }
 
   async updateEducationHistory(
-    userId: string,
-    educationId: string,
+    userId: number,
+    educationId: number,
     createEducationHistoryDto: CreateEducationHistoryDto,
   ): Promise<EducationHistory> {
     const education = await this.educationHistoryRepository.findOne({
-      where: { id: +educationId, job_seeker_id: userId },
+      where: { id: educationId, job_seeker_id: userId },
     });
     if (!education) throw new NotFoundException('Education history not found');
     Object.assign(education, createEducationHistoryDto);
     return this.educationHistoryRepository.save(education);
   }
 
-  async deleteEducationHistory(userId: string, educationId: string): Promise<void> {
+  async deleteEducationHistory(
+    userId: number,
+    educationId: number,
+  ): Promise<void> {
     const education = await this.educationHistoryRepository.findOne({
       where: { id: +educationId, job_seeker_id: userId },
     });
@@ -367,7 +372,7 @@ export class JobSeekersService {
   }
 
   async addWorkExperience(
-    userId: string,
+    userId: number,
     createWorkExperienceDto: CreateWorkExperienceDto,
   ): Promise<WorkExperience> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -383,7 +388,7 @@ export class JobSeekersService {
   }
 
   async updateWorkExperience(
-    userId: string,
+    userId: number,
     experienceId: string,
     createWorkExperienceDto: CreateWorkExperienceDto,
   ): Promise<WorkExperience> {
@@ -395,7 +400,10 @@ export class JobSeekersService {
     return this.workExperienceRepository.save(experience);
   }
 
-  async deleteWorkExperience(userId: string, experienceId: string): Promise<void> {
+  async deleteWorkExperience(
+    userId: number,
+    experienceId: string,
+  ): Promise<void> {
     const experience = await this.workExperienceRepository.findOne({
       where: { id: +experienceId, job_seeker_id: userId },
     });
@@ -404,7 +412,7 @@ export class JobSeekersService {
   }
 
   async addSkillTag(
-    userId: string,
+    userId: number,
     createSkillTagDto: CreateSkillTagDto,
   ): Promise<SkillTag> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -419,15 +427,15 @@ export class JobSeekersService {
     return this.skillTagRepository.save(skill);
   }
 
-  async deleteSkillTag(userId: string, skillId: string): Promise<void> {
+  async deleteSkillTag(userId: number, skillId: number): Promise<void> {
     const skill = await this.skillTagRepository.findOne({
-      where: { id: +skillId, job_seeker_id: userId },
+      where: { id: skillId, job_seeker_id: userId },
     });
     if (!skill) throw new NotFoundException('Skill tag not found');
     await this.skillTagRepository.remove(skill);
   }
 
-  async getNotifications(userId: string): Promise<Notification[]> {
+  async getNotifications(userId: string): Promise<Notification_Applicant[]> {
     return this.notificationRepository.find({
       where: { user_id: +userId },
     });
@@ -436,7 +444,7 @@ export class JobSeekersService {
   async markNotificationAsRead(
     userId: string,
     notificationId: string,
-  ): Promise<Notification> {
+  ): Promise<Notification_Applicant> {
     const checkTheExistingOne = await this.notificationRepository.findOne({
       where: {
         id: +notificationId,
@@ -450,7 +458,7 @@ export class JobSeekersService {
   }
 
   async createJobAlert(
-    userId: string,
+    userId: number,
     createJobAlertDto: CreateJobAlertDto,
   ): Promise<JobAlert> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
@@ -465,7 +473,7 @@ export class JobSeekersService {
     return this.jobAlertRepository.save(jobAlert);
   }
 
-  async getJobAlerts(userId: string): Promise<JobAlert[]> {
+  async getJobAlerts(userId: number): Promise<JobAlert[]> {
     return this.jobAlertRepository.find({
       where: { job_seeker_id: userId },
       order: { created_at: 'DESC' },

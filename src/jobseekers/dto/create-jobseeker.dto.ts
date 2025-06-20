@@ -1,6 +1,15 @@
-import { IsString, IsOptional, IsInt, Min } from 'class-validator';
+import { IsString, IsOptional, IsInt, Min, IsNumber } from 'class-validator';
 
 export class CreateJobSeekerDto {
+  @IsNumber()
+  userId: number;
+
+  @IsString()
+  jobseeker_name: string;
+
+  @IsString()
+  jobseeker_email: string;
+
   @IsString()
   @IsOptional()
   profile_image?: string;

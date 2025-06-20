@@ -11,7 +11,7 @@ export class SavedJob extends BaseEntity {
   @JoinColumn({ name: 'job_seeker_id' })
   jobSeeker: JobSeeker;
   @Column()
-  job_seeker_id: number;
+   job_seeker_id: number;
 
   @ManyToOne(() => Job, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'job_id' })

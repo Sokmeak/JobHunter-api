@@ -1,5 +1,11 @@
 import { User } from 'src/users/entities/user.entity';
-import { Entity, Column, OneToOne, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  OneToOne,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
 import { EducationHistory } from './education.entity';
 import { WorkExperience } from './experience.entity';
 import { SkillTag } from './skill.entity';
@@ -13,12 +19,23 @@ import { JobApplication } from './application.entity';
 
 @Entity('job_seekers')
 export class JobSeeker extends BaseEntity {
+  constructor(partial?: Partial<JobSeeker>) {
+    super();
+    Object.assign(this, partial);
+  }
+
   @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
   @Column()
-  user_id: string;
+  jobseeker_name: string;
+
+  @Column()
+  jobseeker_email: string;
+
+  @Column()
+  user_id: number;
 
   @Column({ nullable: true })
   profile_image: string;
@@ -54,6 +71,7 @@ export class JobSeeker extends BaseEntity {
   @OneToOne(() => InterviewPreference, (preference) => preference.jobSeeker, {
     cascade: true,
   })
+  @JoinColumn({ name: 'jobseeker_id' })
   interviewPreference: InterviewPreference;
 
   @OneToMany(() => EducationHistory, (education) => education.jobSeeker, {

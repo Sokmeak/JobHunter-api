@@ -11,7 +11,7 @@ export class JobApplication extends BaseEntity {
   jobSeeker: JobSeeker;
 
   @Column()
-  job_seeker_id: string;
+   job_seeker_id: number;
 
   @ManyToOne(() => Job, { onDelete: 'CASCADE' })
   job: Job;
