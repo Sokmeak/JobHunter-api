@@ -112,7 +112,7 @@ export class CompaniesService {
     const uploadResult = await this.filesService.uploadFile(file);
     if (type === 'logo') {
       company.brand_logo = uploadResult.originalPath;
-    } 
+    }
     const savedCompany = await this.companyRepository.save(company);
     savedCompany[
       `${type === 'logo' ? 'brand_logo' : 'companiesImages'}_thumbnail`
@@ -120,67 +120,67 @@ export class CompaniesService {
     return savedCompany;
   }
 
-  async getCompanyById(id: number): Promise<
-    Company & {
-      officeImages: Array<{
-        id: number;
-        image_url: string;
-        thumbnail_url: string;
-        caption?: string;
-      }>;
-      technologies: any[];
-    }
-  > {
-    const company = await this.companyRepository.findOne({
-      where: { id: id, isActive: true },
-      relations: [
-        'members',
-        'technologies',
-        'officeLocations',
-        'officeLocations.images',
-        'documents',
-        'jobs',
-      ],
-    });
+  // async getCompanyById(id: number): Promise<
+  //   Company & {
+  //     officeImages: Array<{
+  //       id: number;
+  //       image_url: string;
+  //       thumbnail_url: string;
+  //       caption?: string;
+  //     }>;
+  //     technologies?: any[];
+  //   }
+  // > {
+  //   const company = await this.companyRepository.findOne({
+  //     where: { id: id, isActive: true },
+  //     relations: [
+  //       'members',
+  //       'technologies',
+  //       'officeLocations',
+  //       'officeLocations.images',
+  //       'documents',
+  //       'jobs',
+  //     ],
+  //   });
 
-    if (!company) throw new NotFoundException('Company not found or inactive');
+  //   if (!company) throw new NotFoundException('Company not found or inactive');
 
-    // Aggregate office images from all office locations
-    const officeImages = company.officeLocations.flatMap((location) =>
-      location.images.map((image) => ({
-        id: image.id,
-        image_url: image.image_url,
-        thumbnail_url: '',
-        caption: image.caption,
-      })),
-    );
+  //   // Aggregate office images from all office locations
+  //   const officeImages = company.officeLocations.flatMap((location) =>
+  //     location.images.map((image) => ({
+  //       id: image.id,
+  //       image_url: image.image_url,
+  //       thumbnail_url: '',
+  //       caption: image.caption,
+  //     })),
+  //   );
 
-    // Generate thumbnails for office images
-    for (const officeImage of officeImages) {
-      officeImage.thumbnail_url = await this.filesService.getFileUrl(
-        officeImage.image_url.split('/').pop() ?? '',
-        'thumbnail',
-      );
-    }
+  //   // Generate thumbnails for office images
+  //   for (const officeImage of officeImages) {
+  //     officeImage.thumbnail_url = await this.filesService.getFileUrl(
+  //       officeImage.image_url.split('/').pop() ?? '',
+  //       'thumbnail',
+  //     );
+  //   }
 
-    // Generate thumbnails for brand_logo and companiesImages
-    if (company.brand_logo) {
-      company['brand_logo_thumbnail'] = await this.filesService.getFileUrl(
-        company.brand_logo.split('/').pop() ?? '',
-        'thumbnail',
-      );
-    }
-   
-    for (const document of company.documents) {
-      document['document_url_thumbnail'] = await this.filesService.getFileUrl(
-        document.document_url.split('/').pop() ?? '',
-        'thumbnail',
-      );
-    }
+  //   // Generate thumbnails for brand_logo and companiesImages
+  //   if (company.brand_logo) {
+  //     company['brand_logo_thumbnail'] = await this.filesService.getFileUrl(
+  //       company.brand_logo.split('/').pop() ?? '',
+  //       'thumbnail',
+  //     );
+  //   }
 
-    // Return company with aggregated officeImages
-    return { ...(company as any), officeImages };
-  }
+  //   for (const document of company.documents) {
+  //     document['document_url_thumbnail'] = await this.filesService.getFileUrl(
+  //       document.document_url.split('/').pop() ?? '',
+  //       'thumbnail',
+  //     );
+  //   }
+
+  //   // Return company with aggregated officeImages
+  //   return { ...(company as any), officeImages };
+  // }
 
   // async getCompany(userId: string): Promise<
   //   Company & {
@@ -304,14 +304,14 @@ export class CompaniesService {
         'thumbnail',
       );
     }
-    
+
     for (const document of company.documents) {
       document['document_url_thumbnail'] = await this.filesService.getFileUrl(
         document.document_url.split('/').pop() ?? '',
         'thumbnail',
       );
     }
-    const technologies = await this.getTechStack(company.id.toString());
+    const technologies = await this.getTechStack(userId);
 
     log(technologies);
 
@@ -381,7 +381,7 @@ export class CompaniesService {
           'thumbnail',
         );
       }
-    
+
       for (const document of company.documents) {
         document['document_url_thumbnail'] = await this.filesService.getFileUrl(
           document.document_url.split('/').pop() ?? '',

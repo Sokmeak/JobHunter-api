@@ -39,7 +39,6 @@ import { AuthenticationGuard } from 'src/auth/guards/authentication/jwt-auth.gua
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
-  
   @Get('profile')
   @UseGuards(AuthenticationGuard, RolesGuard)
   getCompany(@Request() req) {
@@ -47,10 +46,6 @@ export class CompaniesController {
     return this.companiesService.getCompany(req.user.id);
   }
 
-
-
-
-  
   @Post()
   @UseGuards(AuthenticationGuard, RolesGuard)
   createCompany(@Body() createCompanyDto: CreateCompanyDto, @Req() req: any) {
@@ -456,6 +451,6 @@ export class CompaniesController {
   @Get('/:id')
   @UseGuards(AuthenticationGuard, RolesGuard)
   getCompanyById(@Param('id') id: number) {
-    return this.companiesService.getCompanyById(id);
+    return this.companiesService.getCompany(id.toString());
   }
 }
