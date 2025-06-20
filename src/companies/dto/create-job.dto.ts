@@ -1,4 +1,13 @@
-import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsDateString, IsArray, IsObject, IsInt } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsBoolean,
+  IsDateString,
+  IsArray,
+  IsObject,
+  IsInt,
+} from 'class-validator';
 
 export class CreateJobDto {
   // @IsInt()
@@ -14,8 +23,9 @@ export class CreateJobDto {
   description: string;
 
   @IsOptional()
-  @IsString()
-  responsibility?: string;
+  @IsArray()
+  @IsString({ each: true })
+  responsibility?: string[];
 
   @IsOptional()
   @IsString()
@@ -75,7 +85,7 @@ export class CreateJobDto {
   };
 
   // Created By
-  @IsOptional()
   @IsString()
+  @IsOptional()
   created_by?: string;
 }

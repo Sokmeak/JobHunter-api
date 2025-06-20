@@ -1,63 +1,3 @@
-// import { Entity, Column, OneToOne } from 'typeorm';
-// import { User } from 'src/users/entities/user.entity';
-// import { BaseEntity } from 'src/database/base.entity';
-// @Entity('companies')
-// export class Company extends BaseEntity {
-//   @Column()
-//   name: string;
-
-//   @Column()
-//   website_url: string;
-
-//   @Column({ nullable: true })
-//   founded_date: string;
-
-//   @Column()
-//   employee_count: string;
-
-//   @Column({ nullable: true })
-//   industry: string;
-
-//   @Column({
-//     nullable: true,
-//   })
-//   office_location: string;
-
-//   @Column({ nullable: true })
-//   twitter_url: string;
-
-//   @Column({ nullable: true })
-//   facebook_url: string;
-
-//   @Column({ nullable: true })
-//   linked_url: string;
-
-//   @Column({ nullable: true })
-//   email: string;
-
-//   @Column({ nullable: true })
-//   hr_contact_name: string;
-
-//   @Column({ nullable: true })
-//   hr_contact_email: string;
-
-//   @Column({
-//     nullable: true,
-//   })
-//   headquarters_location: string;
-
-//   @Column({ default: true })
-//   isActive: boolean;
-
-//   @Column({ default: false })
-//   isVerified: boolean;
-
-//   @OneToOne(() => User, (user) => user.company)
-//   user: User;
-// }
-
-// src/companies/entities/company.entity.ts
-// src/companies/entities/company.entity.ts
 import {
   Entity,
   Column,
@@ -65,30 +5,29 @@ import {
   OneToMany,
   ManyToMany,
   JoinTable,
+  JoinColumn,
 } from 'typeorm';
 
 import { Member } from './member.entity';
-import { Technology } from './technology.entity';
+import { Technology } from '../technology/technology.entity';
 import { OfficeLocation } from './office-location.entity';
-import { JobBenefit } from './job-benefit.entity';
 import { CompanyDocument } from './company-document.entity';
 import { Job } from './job.entity';
 import { User } from 'src/users/entities/user.entity';
 import { BaseEntity } from 'src/database/base.entity';
-import { Colors } from 'chart.js';
+import { CompanyTechStack } from './company-tech-stack.entity';
 
 @Entity('companies')
 export class Company extends BaseEntity {
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @Column()
-  user_id: string;
+  user_id: number;
 
   @Column({ length: 255 })
   name: string;
-
- 
 
   @Column({ type: 'text', nullable: true })
   website_url: string;
@@ -135,26 +74,28 @@ export class Company extends BaseEntity {
   @Column({ default: false })
   isVerified: boolean;
 
-  @OneToMany(() => Member, (member) => member.company, { cascade: true })
+  @OneToMany(() => Member, (member) => member.company, {
+    cascade: true,
+    eager: true,
+  })
   members: Member[];
 
-  @ManyToMany(() => Technology, { cascade: true })
-  @JoinTable({ name: 'company_tech_stack' })
-  technologies: Technology[];
+  // @ManyToMany(() => Technology, { cascade: true })
+  // technologies: Technology[];
+
+  // company.entity.ts
+  @OneToMany(() => CompanyTechStack, (techStack) => techStack.company)
+  techStacks: CompanyTechStack[];
 
   @OneToMany(() => OfficeLocation, (location) => location.company, {
     cascade: true,
   })
   officeLocations: OfficeLocation[];
 
-  @Column({ type: 'text', nullable: true })
-  companiesImages: string; // For company-level images (e.g., banner)
+
 
   @Column({ type: 'text', array: true, nullable: true, default: '{}' })
   officeImages: string[]; // Stores all office image URLs
-
-  @OneToMany(() => JobBenefit, (benefit) => benefit.company, { cascade: true })
-  benefits: JobBenefit[];
 
   @OneToMany(() => CompanyDocument, (document) => document.company, {
     cascade: true,

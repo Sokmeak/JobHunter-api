@@ -88,7 +88,8 @@ export class AuthService {
     // If employer, create company
     if (userDto.role === 'EMPLOYER') {
       const companyData: CreateCompanyDto = {
-        userId: user.id,
+        user_id: user.id,
+        culture_description: '',
         name: userDto.companyName,
         employee_count: String(userDto.companySize), // ensure string
         email: '', // should be a valid email, not website
@@ -101,7 +102,7 @@ export class AuthService {
         office_location: '',
         twitter_url: '',
         facebook_url: '',
-        linked_url: '',
+        linkedin_url: '',
         headquarters_location: '',
         isActive: true,
         isVerified: false,

@@ -1,24 +1,27 @@
-import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { Company } from './company.entity';
 import { JobApplication } from './job-application.entity';
 import { BaseEntity } from 'src/database/base.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('jobs')
 export class Job extends BaseEntity {
   @ManyToOne(() => Company, (company) => company.jobs, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'company_id' })
+  @Exclude()
   company: Company;
 
   @Column()
   company_id: number;
-
+    
   @Column({ length: 100 })
   title: string;
 
   @Column({ type: 'text' })
   description: string;
 
-  @Column({ type: 'text', nullable: true })
-  responsibility: string;
+ @Column({ type: 'text', array: true, nullable: true })
+  responsibility: string[];
 
   @Column({ type: 'text', nullable: true })
   qualification: string;
@@ -78,9 +81,10 @@ export class Job extends BaseEntity {
     relocation_assistance?: string;
     professional_development?: string;
     employee_discounts?: string;
+    tool_access?: string;
   };
 
   // Added field to track who created the job
-  @Column({ length: 100, nullable: true })
-  created_by: string;
+  @Column()
+  created_by: number;
 }

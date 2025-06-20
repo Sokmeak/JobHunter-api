@@ -14,11 +14,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Role } from 'src/roles/entities/role.entity'; // Ensure this path is correct
 import { Company } from 'src/companies/entities/company.entity';
 import { Member } from 'src/companies/entities/member.entity';
-import { Technology } from 'src/companies/entities/technology.entity';
+import { Technology } from 'src/companies/technology/technology.entity';
 import { CompanyTechStack } from 'src/companies/entities/company-tech-stack.entity';
 import { OfficeLocation } from 'src/companies/entities/office-location.entity';
 import { OfficeImage } from 'src/companies/entities/office-image.entity';
-import { JobBenefit } from 'src/companies/entities/job-benefit.entity';
 import { CompanyDocument } from 'src/companies/entities/company-document.entity';
 import { Job } from 'src/companies/entities/job.entity';
 import { JobApplication } from 'src/companies/entities/job-application.entity';
@@ -36,7 +35,7 @@ import { FilesService } from 'src/files/files.service';
       CompanyTechStack,
       OfficeLocation,
       OfficeImage,
-      JobBenefit,
+
       CompanyDocument,
       Job,
       JobApplication,

@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Company } from './entities/company.entity';
 import { BcryptProvider } from 'src/users/bcrypt.provider';
 import { Member } from './entities/member.entity';
-import { Technology } from './entities/technology.entity';
+import { Technology } from './technology/technology.entity';
 import { CompanyTechStack } from './entities/company-tech-stack.entity';
 import { OfficeLocation } from './entities/office-location.entity';
 import { OfficeImage } from './entities/office-image.entity';
@@ -19,6 +19,8 @@ import { User } from 'src/users/entities/user.entity';
 import { FilesService } from 'src/files/files.service';
 import { Notification } from './entities/notification.entity';
 import { Role } from 'src/roles/entities/role.entity';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -29,7 +31,6 @@ import { Role } from 'src/roles/entities/role.entity';
       CompanyTechStack,
       OfficeLocation,
       OfficeImage,
- 
       CompanyDocument,
       Job,
       JobApplication,
@@ -42,6 +43,12 @@ import { Role } from 'src/roles/entities/role.entity';
 
   controllers: [CompaniesController],
 
-  providers: [CompaniesService, UsersService, BcryptProvider, FilesService],
+  providers: [
+    CompaniesService,
+    UsersService,
+    BcryptProvider,
+    FilesService,
+    JwtService,
+  ],
 })
 export class CompaniesModule {}

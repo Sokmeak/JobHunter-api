@@ -4,11 +4,17 @@ import {
   IsEmail,
   IsBoolean,
   IsOptional,
+  IsInt,
 } from 'class-validator';
 
 export class CreateCompanyDto {
   @IsNotEmpty()
-  userId: number;
+  @IsInt()
+  user_id: number;
+
+  @IsString()
+  @IsOptional()
+  culture_description:string
 
   @IsString()
   name: string;
@@ -46,7 +52,7 @@ export class CreateCompanyDto {
 
   @IsOptional()
   @IsString()
-  linked_url?: string;
+  linkedin_url?: string;
 
   @IsEmail()
   email: string;

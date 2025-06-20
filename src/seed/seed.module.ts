@@ -6,6 +6,8 @@ import { Role } from 'src/roles/entities/role.entity';
 import { Company } from 'src/companies/entities/company.entity';
 import { databaseConfig } from 'src/config/database.config';
 import { ConfigModule } from '@nestjs/config';
+import { Job } from 'src/companies/entities/job.entity';
+import { Technology } from 'src/companies/technology/technology.entity';
 
 @Module({
   imports: [
@@ -14,7 +16,7 @@ import { ConfigModule } from '@nestjs/config';
       envFilePath: '.env', // Path to the environment file
     }),
     TypeOrmModule.forRoot(databaseConfig),
-    TypeOrmModule.forFeature([User, Role]), // <-- registers repositories for these entities
+    TypeOrmModule.forFeature([User, Role, Company, Job, Technology]), // <-- registers repositories for these entities
   ],
   providers: [SeedService],
 })
