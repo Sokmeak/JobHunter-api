@@ -5,6 +5,7 @@ import {
   IsBoolean,
   IsOptional,
   IsInt,
+  IsArray,
 } from 'class-validator';
 
 export class CreateCompanyDto {
@@ -14,7 +15,7 @@ export class CreateCompanyDto {
 
   @IsString()
   @IsOptional()
-  culture_description:string
+  culture_description: string;
 
   @IsString()
   name: string;
@@ -76,4 +77,15 @@ export class CreateCompanyDto {
   @IsOptional()
   @IsBoolean()
   isVerified?: boolean;
+
+  
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  benifits?: string[];
 }

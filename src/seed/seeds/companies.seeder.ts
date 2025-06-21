@@ -9,18 +9,137 @@ export class CompaniesSeeder {
   ) {}
 
   async run(): Promise<Company[]> {
-    // Clear existing data
     await this.companyRepository.createQueryBuilder().delete().execute();
 
-    // Filter only EMPLOYER users (first 26 users to cover all companies)
     const employerUsers = this.users.slice(0, 26);
-
-    // Validate that we have enough EMPLOYER users with valid IDs
     if (employerUsers.length < 26 || employerUsers.some((user) => !user.id)) {
       throw new Error(
         'Insufficient or invalid EMPLOYER users for seeding companies',
       );
     }
+
+    const benefitsByIndustry: { [key: string]: string[] } = {
+      'Business Service': [
+        'Remote Working',
+        'Flexible Hours',
+        'Team Retreats',
+        'Learning Stipend',
+      ],
+      'Cloud Storage': [
+        'Health Insurance',
+        'Stock Options',
+        'Remote Working',
+        'Wellness Allowance',
+      ],
+      Cryptocurrency: [
+        'Crypto Bonuses',
+        'Flexible Hours',
+        'Remote Working',
+        'Learning Stipend',
+      ],
+      Infrastructure: [
+        'Stock Options',
+        'Remote Working',
+        'Health Insurance',
+        'Career Development',
+      ],
+      'Financial Technology': [
+        'Health Insurance',
+        'Stock Options',
+        'Flexible Hours',
+        'Financial Planning',
+      ],
+      Design: [
+        'Creative Allowance',
+        'Remote Working',
+        'Health Insurance',
+        'Team Retreats',
+      ],
+      Fitness: [
+        'Gym Membership',
+        'Flexible Hours',
+        'Wellness Allowance',
+        'Team Retreats',
+      ],
+      Productivity: [
+        'Remote Working',
+        'Health Insurance',
+        'Stock Options',
+        'Learning Stipend',
+      ],
+      'Web Development': [
+        'Remote Working',
+        'Learning Stipend',
+        'Health Insurance',
+        'Flexible Hours',
+      ],
+      DevOps: [
+        'Stock Options',
+        'Remote Working',
+        'Health Insurance',
+        'Career Development',
+      ],
+      'Social Media': [
+        'Flexible Hours',
+        'Remote Working',
+        'Team Retreats',
+        'Wellness Allowance',
+      ],
+      Automation: [
+        'Stock Options',
+        'Remote Working',
+        'Health Insurance',
+        'Learning Stipend',
+      ],
+      Communication: [
+        'Health Insurance',
+        'Remote Working',
+        'Team Retreats',
+        'Flexible Hours',
+      ],
+      Creative: [
+        'Creative Allowance',
+        'Health Insurance',
+        'Remote Working',
+        'Team Retreats',
+      ],
+      Networking: [
+        'Flexible Hours',
+        'Remote Working',
+        'Learning Stipend',
+        'Team Retreats',
+      ],
+      Music: [
+        'Music Subscriptions',
+        'Flexible Hours',
+        'Remote Working',
+        'Wellness Allowance',
+      ],
+      AI: [
+        'Research Allowance',
+        'Stock Options',
+        'Remote Working',
+        'Health Insurance',
+      ],
+      'Web Design': [
+        'Creative Allowance',
+        'Remote Working',
+        'Health Insurance',
+        'Learning Stipend',
+      ],
+      'E-commerce': [
+        'Stock Options',
+        'Remote Working',
+        'Health Insurance',
+        'Flexible Hours',
+      ],
+      Technology: [
+        'Health Insurance',
+        'Remote Working',
+        'Learning Stipend',
+        'Team Retreats',
+      ],
+    };
 
     const companies: Partial<Company>[] = [
       {
@@ -39,6 +158,12 @@ export class CompaniesSeeder {
         culture_description:
           'Nomad is a company based in Paris, France, focused on digital innovation and community building.',
         tags: ['Business Service'],
+        brand_logo: 'https://nomadlist.com/logo.png',
+        twitter_url: 'https://twitter.com/nomadlist',
+        facebook_url: 'https://facebook.com/nomadlist',
+        linkedin_url: 'https://linkedin.com/company/nomadlist',
+        officeImages: ['https://nomadlist.com/office1.jpg'],
+        benefits: benefitsByIndustry['Business Service'],
       },
       {
         user_id: employerUsers[1].id,
@@ -56,6 +181,12 @@ export class CompaniesSeeder {
         culture_description:
           'Dropbox is a file hosting service based in San Francisco, USA, known for cloud storage solutions.',
         tags: ['Tech', 'Cloud Storage'],
+        brand_logo: 'https://dropbox.com/logo.png',
+        twitter_url: 'https://twitter.com/dropbox',
+        facebook_url: 'https://facebook.com/dropbox',
+        linkedin_url: 'https://linkedin.com/company/dropbox',
+        officeImages: ['https://dropbox.com/office1.jpg'],
+        benefits: benefitsByIndustry['Cloud Storage'],
       },
       {
         user_id: employerUsers[2].id,
@@ -73,6 +204,12 @@ export class CompaniesSeeder {
         culture_description:
           'Next-generation cryptocurrency exchange with advanced trading.',
         tags: ['Crypto', 'Blockchain', 'Fintech'],
+        brand_logo: 'https://cryptoflow.com/logo.png',
+        twitter_url: 'https://twitter.com/cryptoflow',
+        facebook_url: 'https://facebook.com/cryptoflow',
+        linkedin_url: 'https://linkedin.com/company/cryptoflow',
+        officeImages: ['https://cryptoflow.com/office1.jpg'],
+        benefits: benefitsByIndustry['Cryptocurrency'],
       },
       {
         user_id: employerUsers[3].id,
@@ -90,6 +227,12 @@ export class CompaniesSeeder {
         culture_description:
           'Terraform is a tech company in Hamburg, Germany, specializing in infrastructure as code.',
         tags: ['Tech', 'Infrastructure'],
+        brand_logo: 'https://terraform.io/logo.png',
+        twitter_url: 'https://twitter.com/terraform',
+        facebook_url: 'https://facebook.com/terraform',
+        linkedin_url: 'https://linkedin.com/company/terraform',
+        officeImages: ['https://terraform.io/office1.jpg'],
+        benefits: benefitsByIndustry['Infrastructure'],
       },
       {
         user_id: employerUsers[4].id,
@@ -107,6 +250,12 @@ export class CompaniesSeeder {
         culture_description:
           'Revolut is a fintech company based in Madrid, Spain, offering banking and financial services.',
         tags: ['Fintech'],
+        brand_logo: 'https://revolut.com/logo.png',
+        twitter_url: 'https://twitter.com/revolut',
+        facebook_url: 'https://facebook.com/revolut',
+        linkedin_url: 'https://linkedin.com/company/revolut',
+        officeImages: ['https://revolut.com/office1.jpg'],
+        benefits: benefitsByIndustry['Financial Technology'],
       },
       {
         user_id: employerUsers[5].id,
@@ -124,6 +273,12 @@ export class CompaniesSeeder {
         culture_description:
           'Canva is a design platform based in Ankara, Turkey, empowering users to create visual content.',
         tags: ['Design', 'Tech'],
+        brand_logo: 'https://canva.com/logo.png',
+        twitter_url: 'https://twitter.com/canva',
+        facebook_url: 'https://facebook.com/canva',
+        linkedin_url: 'https://linkedin.com/company/canva',
+        officeImages: ['https://canva.com/office1.jpg'],
+        benefits: benefitsByIndustry['Design'],
       },
       {
         user_id: employerUsers[6].id,
@@ -141,6 +296,12 @@ export class CompaniesSeeder {
         culture_description:
           'ClassPass is a fitness platform based in Berlin, Germany, connecting users with workout classes.',
         tags: ['Fitness', 'Tech'],
+        brand_logo: 'https://classpass.com/logo.png',
+        twitter_url: 'https://twitter.com/classpass',
+        facebook_url: 'https://facebook.com/classpass',
+        linkedin_url: 'https://linkedin.com/company/classpass',
+        officeImages: ['https://classpass.com/office1.jpg'],
+        benefits: benefitsByIndustry['Fitness'],
       },
       {
         user_id: employerUsers[7].id,
@@ -158,6 +319,12 @@ export class CompaniesSeeder {
         culture_description:
           'Pitch is a presentation software company based in Berlin, Germany, focused on collaborative tools.',
         tags: ['Tech', 'Productivity'],
+        brand_logo: 'https://pitch.com/logo.png',
+        twitter_url: 'https://twitter.com/pitch',
+        facebook_url: 'https://facebook.com/pitch',
+        linkedin_url: 'https://linkedin.com/company/pitch',
+        officeImages: ['https://pitch.com/office1.jpg'],
+        benefits: benefitsByIndustry['Productivity'],
       },
       {
         user_id: employerUsers[8].id,
@@ -175,6 +342,12 @@ export class CompaniesSeeder {
         culture_description:
           'Figma is a collaborative design platform based in New York, USA, known for real-time design tools.',
         tags: ['Design', 'Tech'],
+        brand_logo: 'https://figma.com/logo.png',
+        twitter_url: 'https://twitter.com/figma',
+        facebook_url: 'https://facebook.com/figma',
+        linkedin_url: 'https://linkedin.com/company/figma',
+        officeImages: ['https://figma.com/office1.jpg'],
+        benefits: benefitsByIndustry['Design'],
       },
       {
         user_id: employerUsers[9].id,
@@ -192,6 +365,12 @@ export class CompaniesSeeder {
         culture_description:
           'Vercel is a platform for frontend developers based in Amsterdam, Netherlands, simplifying web deployment.',
         tags: ['Tech', 'Web Development'],
+        brand_logo: 'https://vercel.com/logo.png',
+        twitter_url: 'https://twitter.com/vercel',
+        facebook_url: 'https://facebook.com/vercel',
+        linkedin_url: 'https://linkedin.com/company/vercel',
+        officeImages: ['https://vercel.com/office1.jpg'],
+        benefits: benefitsByIndustry['Web Development'],
       },
       {
         user_id: employerUsers[10].id,
@@ -209,6 +388,12 @@ export class CompaniesSeeder {
         culture_description:
           'Notion is a productivity tool company based in Toronto, Canada, offering all-in-one workspace solutions.',
         tags: ['Tech', 'Productivity'],
+        brand_logo: 'https://notion.so/logo.png',
+        twitter_url: 'https://twitter.com/notion',
+        facebook_url: 'https://facebook.com/notion',
+        linkedin_url: 'https://linkedin.com/company/notion',
+        officeImages: ['https://notion.so/office1.jpg'],
+        benefits: benefitsByIndustry['Productivity'],
       },
       {
         user_id: employerUsers[11].id,
@@ -226,6 +411,12 @@ export class CompaniesSeeder {
         culture_description:
           'GitLab is a web-based DevOps lifecycle tool based remotely, providing a Git repository manager.',
         tags: ['Tech', 'DevOps'],
+        brand_logo: 'https://gitlab.com/logo.png',
+        twitter_url: 'https://twitter.com/gitlab',
+        facebook_url: 'https://facebook.com/gitlab',
+        linkedin_url: 'https://linkedin.com/company/gitlab',
+        officeImages: ['https://gitlab.com/office1.jpg'],
+        benefits: benefitsByIndustry['DevOps'],
       },
       {
         user_id: employerUsers[12].id,
@@ -243,6 +434,12 @@ export class CompaniesSeeder {
         culture_description:
           'Buffer is a social media management platform based in London, UK, simplifying content scheduling.',
         tags: ['Tech', 'Social Media'],
+        brand_logo: 'https://buffer.com/logo.png',
+        twitter_url: 'https://twitter.com/buffer',
+        facebook_url: 'https://facebook.com/buffer',
+        linkedin_url: 'https://linkedin.com/company/buffer',
+        officeImages: ['https://buffer.com/office1.jpg'],
+        benefits: benefitsByIndustry['Social Media'],
       },
       {
         user_id: employerUsers[13].id,
@@ -260,6 +457,12 @@ export class CompaniesSeeder {
         culture_description:
           'Trello is a project management tool based in Rome, Italy, known for its Kanban boards.',
         tags: ['Tech', 'Productivity'],
+        brand_logo: 'https://trello.com/logo.png',
+        twitter_url: 'https://twitter.com/trello',
+        facebook_url: 'https://facebook.com/trello',
+        linkedin_url: 'https://linkedin.com/company/trello',
+        officeImages: ['https://trello.com/office1.jpg'],
+        benefits: benefitsByIndustry['Productivity'],
       },
       {
         user_id: employerUsers[14].id,
@@ -277,6 +480,12 @@ export class CompaniesSeeder {
         culture_description:
           'Zapier is an automation platform based in Sydney, Australia, connecting apps for workflows.',
         tags: ['Tech', 'Automation'],
+        brand_logo: 'https://zapier.com/logo.png',
+        twitter_url: 'https://twitter.com/zapier',
+        facebook_url: 'https://facebook.com/zapier',
+        linkedin_url: 'https://linkedin.com/company/zapier',
+        officeImages: ['https://zapier.com/office1.jpg'],
+        benefits: benefitsByIndustry['Automation'],
       },
       {
         user_id: employerUsers[15].id,
@@ -294,6 +503,12 @@ export class CompaniesSeeder {
         culture_description:
           'Slack is a communication platform based in Lisbon, Portugal, enhancing team collaboration.',
         tags: ['Tech', 'Communication'],
+        brand_logo: 'https://slack.com/logo.png',
+        twitter_url: 'https://twitter.com/slack',
+        facebook_url: 'https://facebook.com/slack',
+        linkedin_url: 'https://linkedin.com/company/slack',
+        officeImages: ['https://slack.com/office1.jpg'],
+        benefits: benefitsByIndustry['Communication'],
       },
       {
         user_id: employerUsers[16].id,
@@ -311,6 +526,12 @@ export class CompaniesSeeder {
         culture_description:
           'Klarna is a fintech company based in Stockholm, Sweden, offering buy-now-pay-later services.',
         tags: ['Fintech'],
+        brand_logo: 'https://klarna.com/logo.png',
+        twitter_url: 'https://twitter.com/klarna',
+        facebook_url: 'https://facebook.com/klarna',
+        linkedin_url: 'https://linkedin.com/company/klarna',
+        officeImages: ['https://klarna.com/office1.jpg'],
+        benefits: benefitsByIndustry['Financial Technology'],
       },
       {
         user_id: employerUsers[17].id,
@@ -328,6 +549,12 @@ export class CompaniesSeeder {
         culture_description:
           'Adobe is a software company based in Tokyo, Japan, known for creative and multimedia tools.',
         tags: ['Tech', 'Creative'],
+        brand_logo: 'https://adobe.com/logo.png',
+        twitter_url: 'https://twitter.com/adobe',
+        facebook_url: 'https://facebook.com/adobe',
+        linkedin_url: 'https://linkedin.com/company/adobe',
+        officeImages: ['https://adobe.com/office1.jpg'],
+        benefits: benefitsByIndustry['Creative'],
       },
       {
         user_id: employerUsers[18].id,
@@ -345,6 +572,12 @@ export class CompaniesSeeder {
         culture_description:
           'LinkedIn is a professional networking platform based in Dublin, Ireland, connecting professionals.',
         tags: ['Tech', 'Networking'],
+        brand_logo: 'https://linkedin.com/logo.png',
+        twitter_url: 'https://twitter.com/linkedin',
+        facebook_url: 'https://facebook.com/linkedin',
+        linkedin_url: 'https://linkedin.com/company/linkedin',
+        officeImages: ['https://linkedin.com/office1.jpg'],
+        benefits: benefitsByIndustry['Networking'],
       },
       {
         user_id: employerUsers[19].id,
@@ -362,6 +595,12 @@ export class CompaniesSeeder {
         culture_description:
           'Spotify is a music streaming service based in Oslo, Norway, offering a vast library of audio content.',
         tags: ['Tech', 'Music'],
+        brand_logo: 'https://spotify.com/logo.png',
+        twitter_url: 'https://twitter.com/spotify',
+        facebook_url: 'https://facebook.com/spotify',
+        linkedin_url: 'https://linkedin.com/company/spotify',
+        officeImages: ['https://spotify.com/office1.jpg'],
+        benefits: benefitsByIndustry['Music'],
       },
       {
         user_id: employerUsers[20].id,
@@ -379,6 +618,12 @@ export class CompaniesSeeder {
         culture_description:
           'DeepMind is an AI research company based in London, UK, advancing artificial intelligence.',
         tags: ['Tech', 'AI'],
+        brand_logo: 'https://deepmind.com/logo.png',
+        twitter_url: 'https://twitter.com/deepmind',
+        facebook_url: 'https://facebook.com/deepmind',
+        linkedin_url: 'https://linkedin.com/company/deepmind',
+        officeImages: ['https://deepmind.com/office1.jpg'],
+        benefits: benefitsByIndustry['AI'],
       },
       {
         user_id: employerUsers[21].id,
@@ -390,12 +635,18 @@ export class CompaniesSeeder {
         hr_contact_name: 'HR Webflow',
         hr_contact_email: 'hr@webflow.com',
         industry: 'Web Design',
-        headquarters_location: 'San Francisco, USA',
+        headquarters_location: 'San Francisco, CA',
         isActive: true,
         isVerified: false,
         culture_description:
           'Webflow is a web design platform based in San Francisco, CA, enabling no-code website creation.',
         tags: ['Tech', 'Web Design'],
+        brand_logo: 'https://webflow.com/logo.png',
+        twitter_url: 'https://twitter.com/webflow',
+        facebook_url: 'https://facebook.com/webflow',
+        linkedin_url: 'https://linkedin.com/company/webflow',
+        officeImages: ['https://webflow.com/office1.jpg'],
+        benefits: benefitsByIndustry['Web Design'],
       },
       {
         user_id: employerUsers[22].id,
@@ -413,6 +664,12 @@ export class CompaniesSeeder {
         culture_description:
           'Shopify is an e-commerce platform based remotely, empowering merchants to build online stores.',
         tags: ['Tech', 'E-commerce'],
+        brand_logo: 'https://shopify.com/logo.png',
+        twitter_url: 'https://twitter.com/shopify',
+        facebook_url: 'https://facebook.com/shopify',
+        linkedin_url: 'https://linkedin.com/company/shopify',
+        officeImages: ['https://shopify.com/office1.jpg'],
+        benefits: benefitsByIndustry['E-commerce'],
       },
       {
         user_id: employerUsers[23].id,
@@ -428,8 +685,14 @@ export class CompaniesSeeder {
         isActive: true,
         isVerified: false,
         culture_description:
-          'Dribbble is a design community based remotely, showcasing creative work and connecting designers.',
+          'Dribbble is a platform based remotely, showcasing creative work.',
         tags: ['Design', 'Community'],
+        brand_logo: 'https://dribbble.com/logo.png',
+        twitter_url: 'https://twitter.com/dribbble',
+        facebook_url: 'https://facebook.com/dribbble',
+        linkedin_url: 'https://linkedin.com/company/dribbble',
+        officeImages: ['https://dribbble.com/office1.jpg'],
+        benefits: benefitsByIndustry['Design'],
       },
       {
         user_id: employerUsers[24].id,
@@ -437,16 +700,22 @@ export class CompaniesSeeder {
         email: 'contact@behance.net',
         website_url: 'https://behance.net',
         founded_date: '2005-01-01',
-        employee_count: '201-500',
+        employee_count: '51-200',
         hr_contact_name: 'HR Behance',
         hr_contact_email: 'hr@behance.net',
         industry: 'Design',
-        headquarters_location: 'New York, USA',
+        headquarters_location: 'New York, NY',
         isActive: true,
         isVerified: false,
         culture_description:
           'Behance is a creative platform based in New York, NY, for showcasing and discovering creative work.',
-        tags: ['Design', 'Creative'],
+        tags: ['Tech', 'Design'],
+        brand_logo: 'https://behance.net/logo.png',
+        twitter_url: 'https://twitter.com/behance',
+        facebook_url: 'https://facebook.com/behance',
+        linkedin_url: 'https://linkedin.com/company/behance',
+        officeImages: ['https://behance.net/office1.jpg'],
+        benefits: benefitsByIndustry['Design'],
       },
       {
         user_id: employerUsers[25].id,
@@ -458,17 +727,23 @@ export class CompaniesSeeder {
         hr_contact_name: 'HR Twitter',
         hr_contact_email: 'hr@twitter.com',
         industry: 'Social Media',
-        headquarters_location: 'San Francisco, USA',
+        headquarters_location: 'San Francisco, CA',
         isActive: true,
-        isVerified: false,
+        isVerified: true,
         culture_description:
-          'Twitter is a social media platform based in San Francisco, CA, connecting users through real-time updates.',
-        tags: ['Tech', 'Social Media'],
+          'Twitter is a social media platform based in San Francisco, CA, connecting people through real-time updates.',
+        tags: ['Technology', 'Social Media'],
+        brand_logo: 'https://twitter.com/logo.png',
+        twitter_url: 'https://twitter.com/twitter',
+        facebook_url: 'https://facebook.com/twitter',
+        linkedin_url: 'https://linkedin.com/company/twitter',
+        officeImages: ['https://twitter.com/office1.jpg'],
+        benefits: benefitsByIndustry['Social Media'],
       },
     ];
 
     const result = await this.companyRepository.save(companies);
-    console.log(`✅ Seeded ${result.length} companies successfully.`);
+    console.log(`✅ Successfully seeded ${result.length} companies.`);
 
     return result;
   }

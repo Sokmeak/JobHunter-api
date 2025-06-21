@@ -106,8 +106,7 @@ export class AuthService {
 
     // If employer, create company
     if (userDto.role === 'EMPLOYER') {
-      const companyData: CreateCompanyDto = {
-        user_id: user.id,
+      const companyData: CreateCompanyDto = {        user_id: user.id,
         culture_description: '',
         name: userDto.companyName,
         employee_count: String(userDto.companySize), // ensure string
