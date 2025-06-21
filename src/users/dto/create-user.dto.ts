@@ -30,11 +30,11 @@ export class CreateUserDto {
   @IsNotEmpty()
   roleId: number;
 
-  // Only for employer
-  // @IsOptional()
-  // companyName?: string;
-  // @IsOptional()
-  // companySize?: string;
-  // @IsOptional()
-  // websiteUrl?: string;
+  //Only for employer
+  @IsOptional()
+  companyName?: string;
+  @IsOptional()
+  companySize?: string;
+  @IsOptional()
+  websiteUrl?: string;
 }

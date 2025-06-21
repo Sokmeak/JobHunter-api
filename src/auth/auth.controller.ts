@@ -16,6 +16,7 @@ import { AppModule } from 'src/app.module';
 import { AuthenticationGuard } from './guards/authentication/jwt-auth.guard';
 import { UsersService } from 'src/users/users.service';
 import { SignupDto } from './dts/signup.dto';
+import { log } from 'console';
 
 @Controller('auth')
 export class AuthController {
@@ -47,6 +48,7 @@ export class AuthController {
   @UseGuards(AuthenticationGuard, RolesGuard)
   @Get('profile')
   getProfile(@Request() req) {
+    
     return {
       userId: req.user.id,
       email: req.user.email,

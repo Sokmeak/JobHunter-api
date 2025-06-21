@@ -3,7 +3,8 @@ import { JobSeekersController } from './jobseekers.controller';
 import { JobSeekersService } from './jobseekers.service';
 import { ConfigModule } from '@nestjs/config';
 import { Company } from 'src/companies/entities/company.entity';
-import { Job } from './entities/job.entity';
+import { Job } from 'src/companies/entities/job.entity';
+
 import { JobAlert } from './entities/job-alert.entity';
 import { InterviewInvitation } from './entities/interview-invitation.entity';
 import { SkillTag } from './entities/skill.entity';

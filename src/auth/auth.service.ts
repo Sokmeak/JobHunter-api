@@ -48,15 +48,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // const payload = { email: user.email, sub: user.id, role_id: user.role_id };
-    // this.logger.debug(`Login payload for ${email}: ${JSON.stringify(payload)}`);
-
     const payload = {
       id: user.id,
       email: user.email,
       role: user.role,
     };
-    // log(payload);
 
     return {
       access_token: this.jwtService.sign(payload, {
@@ -91,7 +87,7 @@ export class AuthService {
     // Assume you already have a `user` object after user creation
     if (userDto.role === 'JOB SEEKER') {
       const jobSeekerData: CreateJobSeekerDto = {
-        userId: user.id,
+        user_id: user.id,
         jobseeker_email: user.email,
         jobseeker_name: user.username,
         profile_image: '', // or null / undefined (optional)
@@ -111,21 +107,25 @@ export class AuthService {
     // If employer, create company
     if (userDto.role === 'EMPLOYER') {
       const companyData: CreateCompanyDto = {
-        userId: user.id,
+        user_id: user.id,
+        culture_description: '',
         name: userDto.companyName,
         employee_count: String(userDto.companySize), // ensure string
-        email: userDto.email, // should be a valid email, not website
+        email: '', // should be a valid email, not website
         website_url: userDto.websiteUrl || '',
         // Optional fields, add if available in userDto
+        hr_contact_name: userDto.username,
+        hr_contact_email: user.email,
         founded_date: '',
         industry: '',
         office_location: '',
         twitter_url: '',
         facebook_url: '',
-        linked_url: '',
+        linkedin_url: '',
         headquarters_location: '',
         isActive: true,
         isVerified: false,
+        brand_logo: '',
       };
       await this.companyService.createCompany(String(user.id), companyData);
     }

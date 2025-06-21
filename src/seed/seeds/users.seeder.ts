@@ -2,6 +2,7 @@ import { Repository } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Role } from '../../roles/entities/role.entity';
 import * as bcrypt from 'bcrypt';
+import { RoleENUM } from 'src/roles/interface/roles.interface';
 
 export class UsersSeeder {
   constructor(
@@ -10,41 +11,35 @@ export class UsersSeeder {
   ) {}
 
   async run() {
-    //await this.userRepo.clear();
+    // Find EMPLOYER and JOB SEEKER roles
+    const employerRole = this.roles.find(
+      (role) => role.type === RoleENUM.EMPLOYER,
+    );
+    const jobSeekerRole = this.roles.find(
+      (role) => role.type === RoleENUM.APPLICANT,
+    );
+    if (!employerRole || !jobSeekerRole) {
+      throw new Error('Required roles (EMPLOYER or JOB SEEKER) not found');
+    }
+
     const password = '123456';
-    const hashedPassword = await this.hashPassword('123456');
+    const hashedPassword = await this.hashPassword(password);
 
     const users: Partial<User>[] = [
-      {
-        username: 'john_doe',
-        email: 'john@example.com',
+      // 44 EMPLOYER users
+      ...Array.from({ length: 44 }, (_, index) => ({
+        username: `employer_${index + 1}`,
+        email: `employer${index + 1}@example.com`,
         password: hashedPassword,
-        role: this.roles[0],
-      },
-      {
-        username: 'jane_doe',
-        email: 'jane@example.com',
+        role: employerRole,
+      })),
+      // 30 JOB SEEKER users
+      ...Array.from({ length: 30 }, (_, index) => ({
+        username: `jobseeker_${index + 1}`,
+        email: `jobseeker${index + 1}@example.com`,
         password: hashedPassword,
-        role: this.roles[1],
-      },
-      {
-        username: 'joke_doe',
-        email: 'joke@example.com',
-        password: hashedPassword,
-        role: this.roles[1],
-      },
-      {
-        username: 'heng_ratha',
-        email: 'ratha@example.com',
-        password: hashedPassword,
-        role: this.roles[2],
-      },
-       {
-        username: 'heng_davitt',
-        email: 'davith@example.com',
-        password: hashedPassword,
-        role: this.roles[2],
-      },
+        role: jobSeekerRole,
+      })),
     ];
 
     const result = await this.userRepo.save(users);

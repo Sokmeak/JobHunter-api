@@ -1,12 +1,13 @@
-import { Entity, Column, ManyToOne } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Company } from './company.entity';
 import { BaseEntity } from 'src/database/base.entity';
 
 @Entity('company_documents')
 export class CompanyDocument extends BaseEntity {
   @ManyToOne(() => Company, (company) => company.documents, {
-    onDelete: 'CASCADE',
+    onDelete: 'CASCADE', eager: true
   })
+  @JoinColumn({name: 'company_id'})
   company: Company;
 
   @Column()

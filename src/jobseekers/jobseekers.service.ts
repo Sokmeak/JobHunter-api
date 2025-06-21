@@ -12,7 +12,8 @@ import { SkillTag } from './entities/skill.entity';
 import { WorkExperience } from './entities/experience.entity';
 import { InterviewInvitation } from './entities/interview-invitation.entity';
 import { JobAlert } from './entities/job-alert.entity';
-import { Job } from './entities/job.entity';
+import { Job } from 'src/companies/entities/job.entity';
+
 import { Company } from 'src/companies/entities/company.entity';
 import { CreateJobSeekerDto } from './dto/create-jobseeker.dto';
 import { CreateJobApplicationDto } from './dto/create-job-application.dto';
@@ -73,13 +74,14 @@ export class JobSeekersService {
     private filesService: FilesService,
   ) {}
 
-  async createJobSeeker(
-    userId: number,
-    createJobSeekerDto: CreateJobSeekerDto,
-  ): Promise<JobSeeker> {
+  async createJobSeeker(userId: number, dto: CreateJobSeekerDto): Promise<JobSeeker> {
+    if (dto.user_id !== userId) {
+      throw new Error('userId mismatch');
+    }
+
     const jobSeeker = this.jobSeekerRepository.create({
-      user_id: userId,
-      ...createJobSeekerDto,
+      
+      ...dto,
       educationHistory: [],
       workExperience: [],
       skillTags: [],
@@ -91,10 +93,14 @@ export class JobSeekersService {
       portfolios: [],
       socialLinks: [],
     });
-    log(jobSeeker);
-    return this.jobSeekerRepository.save(jobSeeker);
-  }
 
+    if (dto.jobIds && dto.jobIds.length > 0) {
+      const jobs = await this.jobRepository.findByIds(dto.jobIds);
+      jobSeeker.jobs = jobs;
+    }
+
+    return await this.jobSeekerRepository.save(jobSeeker);
+  }
   async updateJobSeeker(
     userId: number,
     updateJobSeekerDto: CreateJobSeekerDto,

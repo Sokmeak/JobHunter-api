@@ -1,159 +1,17 @@
-// import {
-//   ConflictException,
-//   Injectable,
-//   NotFoundException,
-// } from '@nestjs/common';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { Repository } from 'typeorm';
-// import { Company } from './entities/company.entity';
-// import { CreateCompanyDto } from './dtos/create-company.dto';
-// import { UpdateCompanyDto } from './dtos/update-company.dto';
-// import { User } from '../users/entities/user.entity';
-
-// import { plainToInstance } from 'class-transformer';
-// import { CompanyResponseDto } from './dtos/company-response.dto';
-
-// @Injectable()
-// export class CompaniesService {
-//   constructor(
-//     @InjectRepository(Company)
-//     private readonly companyRepository: Repository<Company>,
-
-//     @InjectRepository(User)
-//     private readonly userRepository: Repository<User>,
-//   ) {}
-
-//   async create(
-//     createCompanyDto: CreateCompanyDto,
-//   ): Promise<CompanyResponseDto> {
-//     const user = await this.userRepository.findOneBy({
-//       id: createCompanyDto.userId,
-//     });
-
-//     if (!user) throw new NotFoundException('User not found');
-
-//     const existing = await this.companyRepository.findOne({
-//       where: { user: { id: user.id } },
-//     });
-//     if (existing) throw new ConflictException('User already has a company');
-
-//     const company = this.companyRepository.create({
-//       ...createCompanyDto,
-//       user,
-//     });
-
-//     const savedCompany = await this.companyRepository.save(company);
-
-//     return plainToInstance(CompanyResponseDto, {
-//       ...savedCompany,
-//       hr_contact: {
-//         name: user.username,
-//         email: user.email,
-//       },
-//     });
-//   }
-
-//   async findAll(): Promise<CompanyResponseDto[]> {
-//     const companies = await this.companyRepository.find({
-//       relations: ['user'],
-//     });
-
-//     return companies.map((company) =>
-//       plainToInstance(CompanyResponseDto, {
-//         ...company,
-//         hr_contact: {
-//           name: company.user?.username,
-//           email: company.user?.email,
-//         },
-//       }),
-//     );
-//   }
-
-//   async findOne(id: number): Promise<CompanyResponseDto> {
-//     const company = await this.companyRepository.findOne({
-//       where: { id },
-//       relations: ['user'],
-//     });
-
-//     if (!company) {
-//       throw new NotFoundException(`Company with id ${id} not found!`);
-//     }
-
-//     return plainToInstance(CompanyResponseDto, {
-//       ...company,
-//       hr_contact: {
-//         name: company.user?.username,
-//         email: company.user?.email,
-//       },
-//     });
-//   }
-
-//   async update(
-//     id: number,
-//     updateCompanyDto: UpdateCompanyDto,
-//   ): Promise<CompanyResponseDto> {
-//     const company = await this.companyRepository.findOne({
-//       where: { id },
-//       relations: ['user'],
-//     });
-//     if (!company) throw new NotFoundException('Company not found');
-
-//     Object.assign(company, updateCompanyDto);
-
-//     const updatedCompany = await this.companyRepository.save(company);
-
-//     return plainToInstance(CompanyResponseDto, {
-//       ...updatedCompany,
-//       hr_contact: {
-//         name: updatedCompany.user?.username,
-//         email: updatedCompany.user?.email,
-//       },
-//     });
-//   }
-
-//   async remove(id: number): Promise<void> {
-//     const company = await this.companyRepository.findOneBy({ id });
-//     if (!company) throw new NotFoundException('Company not found');
-
-//     await this.companyRepository.remove(company);
-//   }
-
-//   async findByUserId(userId: number): Promise<CompanyResponseDto> {
-//     const company = await this.companyRepository.findOne({
-//       where: { user: { id: userId } },
-//       relations: ['user'],
-//     });
-
-//     if (!company) {
-//       throw new NotFoundException(
-//         `Company for user with id ${userId} not found!`,
-//       );
-//     }
-
-//     return plainToInstance(CompanyResponseDto, {
-//       ...company,
-//       hr_contact: {
-//         name: company.user?.username,
-//         email: company.user?.email,
-//       },
-//     });
-//   }
-// }
-// src/companies/companies.service.ts
 import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, In } from 'typeorm';
 import { Company } from './entities/company.entity';
 import { Member } from './entities/member.entity';
-import { Technology } from './entities/technology.entity';
+import { Technology } from './technology/technology.entity';
 import { CompanyTechStack } from './entities/company-tech-stack.entity';
 import { OfficeLocation } from './entities/office-location.entity';
 import { OfficeImage } from './entities/office-image.entity';
-import { JobBenefit } from './entities/job-benefit.entity';
 import { CompanyDocument } from './entities/company-document.entity';
 import { Job } from './entities/job.entity';
 import { JobApplication } from './entities/job-application.entity';
@@ -166,8 +24,6 @@ import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { CreateOfficeLocationDto } from './dto/create-office-location.dto';
 import { UpdateOfficeLocationDto } from './dto/update-office-location.dto';
-import { CreateJobBenefitDto } from './dto/create-job-benefit.dto';
-import { UpdateJobBenefitDto } from './dto/update-job-benefit.dto';
 import { CreateOfficeImageDto } from './dto/create-office-image.dto';
 import { UpdateOfficeImageDto } from './dto/update-office-image.dto';
 import { CreateCompanyDocumentDto } from './dto/create-document.dto';
@@ -177,6 +33,7 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { UpdateApplicationStatusDto } from './dto/update-application-status.dto';
 import { ScheduleInterviewDto } from './dto/schedule-interview.dto';
 import { SendNotificationDto } from './dto/send-notification.dto';
+import { log } from 'console';
 
 @Injectable()
 export class CompaniesService {
@@ -193,8 +50,6 @@ export class CompaniesService {
     private officeLocationRepository: Repository<OfficeLocation>,
     @InjectRepository(OfficeImage)
     private officeImageRepository: Repository<OfficeImage>,
-    @InjectRepository(JobBenefit)
-    private jobBenefitRepository: Repository<JobBenefit>,
     @InjectRepository(CompanyDocument)
     private companyDocumentRepository: Repository<CompanyDocument>,
     @InjectRepository(Job)
@@ -208,17 +63,18 @@ export class CompaniesService {
     private filesService: FilesService,
   ) {}
 
+  private readonly logger = new Logger(CompaniesService.name);
+
   async createCompany(
     userId: string,
     createCompanyDto: CreateCompanyDto,
   ): Promise<Company> {
     const existingCompany = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (existingCompany)
       throw new BadRequestException('User already has a company');
     const company = this.companyRepository.create({
-      user_id: userId,
       ...createCompanyDto,
     });
     return this.companyRepository.save(company);
@@ -229,7 +85,7 @@ export class CompaniesService {
     updateCompanyDto: UpdateCompanyDto,
   ): Promise<Company> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     Object.assign(company, updateCompanyDto);
@@ -242,7 +98,7 @@ export class CompaniesService {
     type: 'logo' | 'image',
   ): Promise<Company> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     if (
@@ -256,8 +112,6 @@ export class CompaniesService {
     const uploadResult = await this.filesService.uploadFile(file);
     if (type === 'logo') {
       company.brand_logo = uploadResult.originalPath;
-    } else {
-      company.companiesImages = uploadResult.originalPath;
     }
     const savedCompany = await this.companyRepository.save(company);
     savedCompany[
@@ -265,6 +119,140 @@ export class CompaniesService {
     ] = await this.filesService.getFileUrl(uploadResult.fileName, 'thumbnail');
     return savedCompany;
   }
+
+  // async getCompanyById(id: number): Promise<
+  //   Company & {
+  //     officeImages: Array<{
+  //       id: number;
+  //       image_url: string;
+  //       thumbnail_url: string;
+  //       caption?: string;
+  //     }>;
+  //     technologies?: any[];
+  //   }
+  // > {
+  //   const company = await this.companyRepository.findOne({
+  //     where: { id: id, isActive: true },
+  //     relations: [
+  //       'members',
+  //       'technologies',
+  //       'officeLocations',
+  //       'officeLocations.images',
+  //       'documents',
+  //       'jobs',
+  //     ],
+  //   });
+
+  //   if (!company) throw new NotFoundException('Company not found or inactive');
+
+  //   // Aggregate office images from all office locations
+  //   const officeImages = company.officeLocations.flatMap((location) =>
+  //     location.images.map((image) => ({
+  //       id: image.id,
+  //       image_url: image.image_url,
+  //       thumbnail_url: '',
+  //       caption: image.caption,
+  //     })),
+  //   );
+
+  //   // Generate thumbnails for office images
+  //   for (const officeImage of officeImages) {
+  //     officeImage.thumbnail_url = await this.filesService.getFileUrl(
+  //       officeImage.image_url.split('/').pop() ?? '',
+  //       'thumbnail',
+  //     );
+  //   }
+
+  //   // Generate thumbnails for brand_logo and companiesImages
+  //   if (company.brand_logo) {
+  //     company['brand_logo_thumbnail'] = await this.filesService.getFileUrl(
+  //       company.brand_logo.split('/').pop() ?? '',
+  //       'thumbnail',
+  //     );
+  //   }
+
+  //   for (const document of company.documents) {
+  //     document['document_url_thumbnail'] = await this.filesService.getFileUrl(
+  //       document.document_url.split('/').pop() ?? '',
+  //       'thumbnail',
+  //     );
+  //   }
+
+  //   // Return company with aggregated officeImages
+  //   return { ...(company as any), officeImages };
+  // }
+
+  // async getCompany(userId: string): Promise<
+  //   Company & {
+  //     officeImages: Array<{
+  //       id: number;
+  //       image_url: string;
+  //       thumbnail_url: string;
+  //       caption?: string;
+  //     }>;
+  //   }
+  // > {
+  //   const company = await this.companyRepository
+  //     .createQueryBuilder('company')
+  //     .leftJoinAndSelect('company.members', 'members')
+  //     .leftJoinAndSelect('company.officeLocations', 'officeLocations')
+  //     .leftJoinAndSelect('officeLocations.images', 'officeImages') // only if `images` is a valid relation
+  //     .leftJoinAndSelect('company.documents', 'documents')
+  //     .leftJoinAndSelect('company.jobs', 'jobs')
+  //     .where('company.user_id = :userId', { userId: parseInt(userId) })
+  //     .andWhere('company.isActive = true')
+  //     .getOne();
+
+  //   if (!company) {
+  //     throw new NotFoundException('Company not found or inactive');
+  //   }
+
+  // // Aggregate office images
+  // const officeImages = company.officeLocations.flatMap(
+  //   (location) =>
+  //     location.images?.map((image) => ({
+  //       id: image.id,
+  //       image_url: image.image_url,
+  //       thumbnail_url: '',
+  //       caption: image.caption,
+  //     })) ?? [],
+  // );
+
+  // // Generate thumbnails for office images
+  // for (const officeImage of officeImages) {
+  //   officeImage.thumbnail_url = await this.filesService.getFileUrl(
+  //     officeImage.image_url.split('/').pop() ?? '',
+  //     'thumbnail',
+  //   );
+  // }
+
+  // // Generate thumbnails for brand logo and companiesImages
+  // if (company.brand_logo) {
+  //   company['brand_logo_thumbnail'] = await this.filesService.getFileUrl(
+  //     company.brand_logo.split('/').pop() ?? '',
+  //     'thumbnail',
+  //   );
+  // }
+
+  // if (company.companiesImages) {
+  //   company['companiesImages_thumbnail'] = await this.filesService.getFileUrl(
+  //     company.companiesImages.split('/').pop() ?? '',
+  //     'thumbnail',
+  //   );
+  // }
+
+  // // Thumbnails for documents
+  // for (const document of company.documents) {
+  //   document['document_url_thumbnail'] = await this.filesService.getFileUrl(
+  //     document.document_url.split('/').pop() ?? '',
+  //     'thumbnail',
+  //   );
+  // }
+
+  //   const technologies = await this.getTechStack(company.id.toString());
+
+  //   return { ...(company as any), technologies };
+  // }
 
   async getCompany(userId: string): Promise<
     Company & {
@@ -274,23 +262,24 @@ export class CompaniesService {
         thumbnail_url: string;
         caption?: string;
       }>;
+      technologies: any[];
     }
   > {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId, isActive: true },
+      where: { user_id: parseInt(userId), isActive: true },
       relations: [
         'members',
-        'technologies',
         'officeLocations',
         'officeLocations.images',
-        'benefits',
         'documents',
         'jobs',
       ],
     });
+
     if (!company) throw new NotFoundException('Company not found or inactive');
 
     // Aggregate office images from all office locations
+
     const officeImages = company.officeLocations.flatMap((location) =>
       location.images.map((image) => ({
         id: image.id,
@@ -315,21 +304,19 @@ export class CompaniesService {
         'thumbnail',
       );
     }
-    if (company.companiesImages) {
-      company['companiesImages_thumbnail'] = await this.filesService.getFileUrl(
-        company.companiesImages.split('/').pop() ?? '',
-        'thumbnail',
-      );
-    }
+
     for (const document of company.documents) {
       document['document_url_thumbnail'] = await this.filesService.getFileUrl(
         document.document_url.split('/').pop() ?? '',
         'thumbnail',
       );
     }
+    const technologies = await this.getTechStack(userId);
+
+    log(technologies);
 
     // Return company with aggregated officeImages
-    return { ...(company as any), officeImages };
+    return { ...(company as any), officeImages, technologies };
   }
 
   async getCompanies(
@@ -356,8 +343,8 @@ export class CompaniesService {
       .leftJoinAndSelect('company.technologies', 'technologies')
       .leftJoinAndSelect('company.officeLocations', 'officeLocations')
       .leftJoinAndSelect('officeLocations.images', 'images')
-      .leftJoinAndSelect('company.benefits', 'benefits')
-      .leftJoinAndSelect('company.documents', 'documents');
+      .leftJoinAndSelect('company.documents', 'documents')
+      .leftJoinAndSelect('company.jobs', 'jobs');
     if (industry)
       query.andWhere('company.industry LIKE :industry', {
         industry: `%${industry}%`,
@@ -394,13 +381,7 @@ export class CompaniesService {
           'thumbnail',
         );
       }
-      if (company.companiesImages) {
-        company['companiesImages_thumbnail'] =
-          await this.filesService.getFileUrl(
-            company.companiesImages.split('/').pop() ?? '',
-            'thumbnail',
-          );
-      }
+
       for (const document of company.documents) {
         document['document_url_thumbnail'] = await this.filesService.getFileUrl(
           document.document_url.split('/').pop() ?? '',
@@ -414,21 +395,22 @@ export class CompaniesService {
 
   async deleteCompany(userId: string): Promise<void> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     await this.companyRepository.update(
-      { user_id: userId },
+      { user_id: +userId },
       { isActive: false },
     );
   }
+
   async addMember(
     userId: string,
     createMemberDto: CreateMemberDto,
     file?: Express.Multer.File,
   ): Promise<Member> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     if (
@@ -462,8 +444,10 @@ export class CompaniesService {
 
   async getMembers(userId: string): Promise<Member[]> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: parseInt(userId) },
     });
+
+    log('Company data: ' + company);
     if (!company) throw new NotFoundException('Company not found');
     const members = await this.memberRepository.find({
       where: { company_id: company.id },
@@ -487,7 +471,7 @@ export class CompaniesService {
     file?: Express.Multer.File,
   ): Promise<Member> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const member = await this.memberRepository.findOne({
@@ -520,7 +504,7 @@ export class CompaniesService {
 
   async deleteMember(userId: string, memberId: number): Promise<void> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const member = await this.memberRepository.findOne({
@@ -530,53 +514,118 @@ export class CompaniesService {
     await this.memberRepository.delete(memberId);
   }
 
-  async addTechStack(userId: string, technologyId: number): Promise<void> {
+  async addTechStack(
+    userId: string,
+    technologyId: number,
+  ): Promise<CompanyTechStack> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
+
     const technology = await this.technologyRepository.findOne({
       where: { id: technologyId },
     });
     if (!technology) throw new NotFoundException('Technology not found');
+
     const existingTechStack = await this.companyTechStackRepository.findOne({
-      where: { id: company.id, technology_id: technologyId },
+      where: {
+        company_id: company.id,
+        technology_id: technologyId,
+      },
     });
+
     if (existingTechStack)
       throw new BadRequestException('Technology already in tech stack');
+
     const techStack = this.companyTechStackRepository.create({
-      id: company.id,
+      company_id: company.id,
       technology_id: technologyId,
       company,
       technology,
     });
-    await this.companyTechStackRepository.save(techStack);
+
+    return this.companyTechStackRepository.save(techStack);
   }
 
   async getTechStack(userId: string): Promise<Technology[]> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
+
     const techStacks = await this.companyTechStackRepository.find({
-      where: { id: company.id },
+      where: { company_id: company.id },
       relations: ['technology'],
     });
+
     return techStacks.map((ts) => ts.technology);
+  }
+
+  async updateTechStack(
+    userId: string,
+    oldTechnologyId: number,
+    newTechnologyId: number,
+  ): Promise<CompanyTechStack> {
+    const company = await this.companyRepository.findOne({
+      where: { user_id: +userId },
+    });
+    if (!company) throw new NotFoundException('Company not found');
+
+    // Check if the old tech exists in the tech stack
+    const techStack = await this.companyTechStackRepository.findOne({
+      where: {
+        company_id: company.id,
+        technology_id: oldTechnologyId,
+      },
+      relations: ['technology'],
+    });
+    if (!techStack)
+      throw new NotFoundException('Old technology not found in tech stack');
+
+    // Check if the new tech already exists in the tech stack
+    const duplicate = await this.companyTechStackRepository.findOne({
+      where: {
+        company_id: company.id,
+        technology_id: newTechnologyId,
+      },
+    });
+    if (duplicate)
+      throw new BadRequestException(
+        'New technology already exists in tech stack',
+      );
+
+    // Fetch the new technology entity
+    const newTech = await this.technologyRepository.findOne({
+      where: { id: newTechnologyId },
+    });
+    if (!newTech) throw new NotFoundException('New technology not found');
+
+    // Update the tech stack entry
+    techStack.technology_id = newTechnologyId;
+    techStack.technology = newTech;
+
+    return this.companyTechStackRepository.save(techStack);
   }
 
   async deleteTechStack(userId: string, technologyId: number): Promise<void> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
+
     const techStack = await this.companyTechStackRepository.findOne({
-      where: { id: company.id, technology_id: technologyId },
+      where: {
+        company_id: company.id,
+        technology_id: technologyId,
+      },
     });
+
     if (!techStack)
       throw new NotFoundException('Technology not found in tech stack');
+
     await this.companyTechStackRepository.delete({
-      id: company.id,
+      company_id: company.id,
       technology_id: technologyId,
     });
   }
@@ -586,7 +635,7 @@ export class CompaniesService {
     createOfficeLocationDto: CreateOfficeLocationDto,
   ): Promise<OfficeLocation> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     if (createOfficeLocationDto.is_headquarters) {
@@ -605,7 +654,7 @@ export class CompaniesService {
 
   async getOfficeLocations(userId: string): Promise<OfficeLocation[]> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     return this.officeLocationRepository.find({
@@ -620,7 +669,7 @@ export class CompaniesService {
     updateOfficeLocationDto: UpdateOfficeLocationDto,
   ): Promise<OfficeLocation> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const location = await this.officeLocationRepository.findOne({
@@ -642,7 +691,7 @@ export class CompaniesService {
     locationId: number,
   ): Promise<void> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const location = await this.officeLocationRepository.findOne({
@@ -659,7 +708,7 @@ export class CompaniesService {
     file: Express.Multer.File,
   ): Promise<OfficeImage> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const location = await this.officeLocationRepository.findOne({
@@ -694,7 +743,7 @@ export class CompaniesService {
     locationId: number,
   ): Promise<OfficeImage[]> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const location = await this.officeLocationRepository.findOne({
@@ -721,7 +770,7 @@ export class CompaniesService {
     file?: Express.Multer.File,
   ): Promise<OfficeImage> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const image = await this.officeImageRepository.findOne({
@@ -755,7 +804,7 @@ export class CompaniesService {
     imageId: number,
   ): Promise<void> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const image = await this.officeImageRepository.findOne({
@@ -765,114 +814,13 @@ export class CompaniesService {
     await this.officeImageRepository.delete(imageId);
   }
 
-  async addJobBenefit(
-    userId: string,
-    createJobBenefitDto: CreateJobBenefitDto,
-    file?: Express.Multer.File,
-  ): Promise<JobBenefit> {
-    const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
-    });
-    if (!company) throw new NotFoundException('Company not found');
-    if (
-      file &&
-      (!['image/png', 'image/jpeg'].includes(file.mimetype) ||
-        file.size > 2 * 1024 * 1024)
-    ) {
-      throw new BadRequestException('Invalid icon format or size exceeds 2MB');
-    }
-    const icon = file
-      ? (await this.filesService.uploadFile(file)).originalPath
-      : createJobBenefitDto.icon;
-    const benefit = this.jobBenefitRepository.create({
-      company,
-      company_id: company.id,
-      ...createJobBenefitDto,
-      icon,
-    });
-    const savedBenefit = await this.jobBenefitRepository.save(benefit);
-    if (icon) {
-      savedBenefit['icon_thumbnail'] = await this.filesService.getFileUrl(
-        icon.split('/').pop() ?? '',
-        'thumbnail',
-      );
-    }
-    return savedBenefit;
-  }
-
-  async getJobBenefits(userId: string): Promise<JobBenefit[]> {
-    const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
-    });
-    if (!company) throw new NotFoundException('Company not found');
-    const benefits = await this.jobBenefitRepository.find({
-      where: { company_id: company.id },
-    });
-    for (const benefit of benefits) {
-      if (benefit.icon) {
-        benefit['icon_thumbnail'] = await this.filesService.getFileUrl(
-          benefit.icon.split('/').pop() ?? '',
-          'thumbnail',
-        );
-      }
-    }
-    return benefits;
-  }
-
-  async updateJobBenefit(
-    userId: string,
-    benefitId: number,
-    updateJobBenefitDto: UpdateJobBenefitDto,
-    file?: Express.Multer.File,
-  ): Promise<JobBenefit> {
-    const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
-    });
-    if (!company) throw new NotFoundException('Company not found');
-    const benefit = await this.jobBenefitRepository.findOne({
-      where: { id: benefitId, company_id: company.id },
-    });
-    if (!benefit) throw new NotFoundException('Job benefit not found');
-    if (
-      file &&
-      (!['image/png', 'image/jpeg'].includes(file.mimetype) ||
-        file.size > 2 * 1024 * 1024)
-    ) {
-      throw new BadRequestException('Invalid icon format or size exceeds 2MB');
-    }
-    const icon = file
-      ? (await this.filesService.uploadFile(file)).originalPath
-      : benefit.icon;
-    Object.assign(benefit, { ...updateJobBenefitDto, icon });
-    const savedBenefit = await this.jobBenefitRepository.save(benefit);
-    if (icon) {
-      savedBenefit['icon_thumbnail'] = await this.filesService.getFileUrl(
-        icon.split('/').pop() ?? '',
-        'thumbnail',
-      );
-    }
-    return savedBenefit;
-  }
-
-  async deleteJobBenefit(userId: string, benefitId: number): Promise<void> {
-    const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
-    });
-    if (!company) throw new NotFoundException('Company not found');
-    const benefit = await this.jobBenefitRepository.findOne({
-      where: { id: benefitId, company_id: company.id },
-    });
-    if (!benefit) throw new NotFoundException('Job benefit not found');
-    await this.jobBenefitRepository.delete(benefitId);
-  }
-
   async addCompanyDocument(
     userId: string,
     createCompanyDocumentDto: CreateCompanyDocumentDto,
     file: Express.Multer.File,
   ): Promise<CompanyDocument> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     if (
@@ -885,7 +833,6 @@ export class CompaniesService {
     }
     const uploadResult = await this.filesService.uploadFile(file);
     const document = this.companyDocumentRepository.create({
-      company,
       company_id: company.id,
       document_name: createCompanyDocumentDto.document_name,
       document_url: uploadResult.originalPath,
@@ -898,7 +845,7 @@ export class CompaniesService {
 
   async getCompanyDocuments(userId: string): Promise<CompanyDocument[]> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const documents = await this.companyDocumentRepository.find({
@@ -920,7 +867,7 @@ export class CompaniesService {
     file?: Express.Multer.File,
   ): Promise<CompanyDocument> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const document = await this.companyDocumentRepository.findOne({
@@ -959,7 +906,7 @@ export class CompaniesService {
     documentId: number,
   ): Promise<void> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const document = await this.companyDocumentRepository.findOne({
@@ -971,13 +918,13 @@ export class CompaniesService {
 
   async createJob(userId: string, createJobDto: CreateJobDto): Promise<Job> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
+
     const job = this.jobRepository.create({
-      company,
-      company_id: company.id,
       ...createJobDto,
+      created_by: company.user_id,
     });
     return this.jobRepository.save(job);
   }
@@ -988,7 +935,7 @@ export class CompaniesService {
     updateJobDto: UpdateJobDto,
   ): Promise<Job> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const job = await this.jobRepository.findOne({
@@ -1001,7 +948,7 @@ export class CompaniesService {
 
   async deleteJob(userId: string, jobId: number): Promise<void> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const job = await this.jobRepository.findOne({
@@ -1011,22 +958,90 @@ export class CompaniesService {
     await this.jobRepository.delete(jobId);
   }
 
-  async getJobs(
-    userId: string,
+  async getJob(userId: string, jobId: number): Promise<Job> {
+    const company = await this.companyRepository.findOne({
+      where: { user_id: +userId },
+    });
+
+    log(company);
+    if (!company) throw new NotFoundException('Company not found');
+    const job = await this.jobRepository.findOne({
+      where: { id: jobId, company_id: company.id },
+    });
+    if (!job) throw new NotFoundException('Job not found');
+    return job;
+  }
+
+  // get general jobs
+  async getAllJobs(
     page: number = 1,
     limit: number = 10,
-  ): Promise<{ jobs: Job[]; total: number }> {
+    industry?: string,
+  ): Promise<{ jobs: Array<Job & { company: Company }>; total: number }> {
+    // const query = this.jobRepository
+    //   .createQueryBuilder('job')
+    //   .leftJoinAndSelect('job.company', 'company')
+    //   .where('company.isActive = :isActive', { isActive: true });
+
+    // if (industry) {
+    //   query.andWhere('company.industry LIKE :industry', { industry: `%${industry}%` });
+    // }
+
+    // query.skip((page - 1) * limit).take(limit);
+
+    // const [jobs, total] = await query.getManyAndCount();
+
+    // const jobsWithCompany = jobs.map((job) => ({
+    //   ...job,
+    //   company: job.company,
+    // }));
+
+    const [jobs, total] = await this.jobRepository.findAndCount({
+      relations: ['company'],
+      where: {
+        company: {
+          isActive: true,
+          ...(industry ? { industry: Like(`%${industry}%`) } : {}),
+        },
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return { jobs: jobs, total };
+  }
+
+  async getJobs(
+    userId: number,
+    page: number,
+    limit: number,
+  ): Promise<{ jobs: Array<Job & { company: Company }>; total: number }> {
+    if (isNaN(userId) || !Number.isInteger(userId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+    if (page < 1 || limit < 1) {
+      throw new BadRequestException('Invalid page or limit');
+    }
+
     const company = await this.companyRepository.findOne({
       where: { user_id: userId },
     });
+
     if (!company) throw new NotFoundException('Company not found');
+    console.log('Fetching jobs for company ID:', company.id);
     const [jobs, total] = await this.jobRepository.findAndCount({
       where: { company_id: company.id },
       relations: ['applications'],
       skip: (page - 1) * limit,
       take: limit,
     });
-    return { jobs, total };
+
+    const jobsWithCompany = jobs.map((job) => ({
+      ...job,
+      company,
+    }));
+
+    return { jobs: jobsWithCompany, total };
   }
 
   async getJobApplications(
@@ -1037,7 +1052,7 @@ export class CompaniesService {
     limit: number = 10,
   ): Promise<{ applications: JobApplication[]; total: number }> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const job = await this.jobRepository.findOne({
@@ -1069,7 +1084,7 @@ export class CompaniesService {
     updateApplicationStatusDto: UpdateApplicationStatusDto,
   ): Promise<JobApplication> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const application = await this.jobApplicationRepository.findOne({
@@ -1102,7 +1117,7 @@ export class CompaniesService {
     scheduleInterviewDto: ScheduleInterviewDto,
   ): Promise<Interview> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const application = await this.jobApplicationRepository.findOne({
@@ -1133,7 +1148,7 @@ export class CompaniesService {
     limit: number = 10,
   ): Promise<{ interviews: Interview[]; total: number }> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const query = this.interviewRepository
@@ -1154,7 +1169,7 @@ export class CompaniesService {
     status: string,
   ): Promise<Interview> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const interview = await this.interviewRepository.findOne({
@@ -1178,7 +1193,7 @@ export class CompaniesService {
     sendNotificationDto: SendNotificationDto,
   ): Promise<Notification> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const notification = this.notificationRepository.create({
@@ -1191,7 +1206,7 @@ export class CompaniesService {
 
   async getAnalytics(userId: string, jobId?: number): Promise<any> {
     const company = await this.companyRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: +userId },
     });
     if (!company) throw new NotFoundException('Company not found');
     const query = this.jobRepository

@@ -10,6 +10,9 @@ import { AuthModule } from './auth/auth.module';
 import { CompaniesModule } from './companies/companies.module';
 import { FilesModule } from './files/files.module';
 import { JobSeekersModule } from './jobseekers/jobseekers.module';
+import { TechnologyModule } from './companies/technology/technology.module';
+
+import { JobhunterSystemModule } from './jobhunter-system/jobhunter-system.module';
 
 @Module({
   // Importing ConfigModule to manage environment variables
@@ -25,6 +28,8 @@ import { JobSeekersModule } from './jobseekers/jobseekers.module';
     CompaniesModule,
     FilesModule,
     JobSeekersModule, // Forward reference to AuthModule
+    TechnologyModule,
+    JobhunterSystemModule,
   ],
   controllers: [AppController],
   providers: [AppService],
