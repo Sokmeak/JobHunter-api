@@ -1,30 +1,54 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
 import { Company } from './company.entity';
 import { JobApplication } from './job-application.entity';
 import { BaseEntity } from 'src/database/base.entity';
-import { Exclude } from 'class-transformer';
+import { JobSeeker } from 'src/jobseekers/entities/jobseeker.entity';
 
 @Entity('jobs')
 export class Job extends BaseEntity {
   @ManyToOne(() => Company, (company) => company.jobs, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'company_id' })
-  @Exclude()
   company: Company;
 
   @Column()
   company_id: number;
-    
+
+  @ManyToMany(() => JobSeeker, (jobSeeker) => jobSeeker.jobs, { cascade: true })
+  @JoinTable({
+    name: 'job_jobseeker',
+    joinColumn: {
+      name: 'job_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'jobseeker_id',
+      referencedColumnName: 'id',
+    },
+  })
+  jobSeekers: JobSeeker[];
+
   @Column({ length: 100 })
   title: string;
 
   @Column({ type: 'text' })
   description: string;
 
- @Column({ type: 'text', array: true, nullable: true })
+  @Column({ type: 'text', array: true, nullable: true })
   responsibility: string[];
 
   @Column({ type: 'text', nullable: true })
   qualification: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  level: string;
 
   @Column({ length: 100, nullable: true })
   job_type: string;
@@ -34,6 +58,12 @@ export class Job extends BaseEntity {
 
   @Column({ type: 'varchar', nullable: true })
   salary_range: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  location: string;
+
+  @Column({ type: 'int', nullable: true })
+  capacity: number;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   posted_at: string;
@@ -55,15 +85,15 @@ export class Job extends BaseEntity {
   })
   applications: JobApplication[];
 
-  // Who You Are
   @Column({ type: 'text', array: true, nullable: true })
   who_you_are: string[];
 
-  // Nice-To-Haves
   @Column({ type: 'text', array: true, nullable: true })
   nice_to_haves: string[];
 
-  // Perks & Benefits
+  @Column({ type: 'text', array: true, nullable: true })
+  tags: string[];
+
   @Column({ type: 'jsonb', nullable: true })
   perks_benefits: {
     health_coverage?: string;
@@ -84,7 +114,6 @@ export class Job extends BaseEntity {
     tool_access?: string;
   };
 
-  // Added field to track who created the job
   @Column()
   created_by: number;
 }

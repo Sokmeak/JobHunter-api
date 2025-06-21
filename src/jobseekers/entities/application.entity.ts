@@ -1,7 +1,8 @@
 import { JobSeeker } from '../entities/jobseeker.entity';
-import { Job } from 'src/jobseekers/entities/job.entity';
+
 import { Entity, Column, ManyToOne } from 'typeorm';
 import { BaseEntity } from 'src/database/base.entity';
+import { Job } from 'src/companies/entities/job.entity';
 
 @Entity('job_applications')
 export class JobApplication extends BaseEntity {

@@ -1,6 +1,7 @@
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { JobSeeker } from '../entities/jobseeker.entity';
-import { Job } from '../entities/job.entity';
+import { Job } from 'src/companies/entities/job.entity';
+
 import { BaseEntity } from 'src/database/base.entity';
 
 @Entity('saved_jobs')

@@ -4,7 +4,6 @@ import { Role } from '../../roles/entities/role.entity';
 import * as bcrypt from 'bcrypt';
 import { RoleENUM } from 'src/roles/interface/roles.interface';
 
-// UsersSeeder (updated for 10 EMPLOYER and 10 JOB SEEKER users)
 export class UsersSeeder {
   constructor(
     private readonly userRepo: Repository<User>,
@@ -27,128 +26,20 @@ export class UsersSeeder {
     const hashedPassword = await this.hashPassword(password);
 
     const users: Partial<User>[] = [
-      // 10 EMPLOYER users
-      {
-        username: 'employer_1',
-        email: 'employer1@example.com',
+      // 44 EMPLOYER users
+      ...Array.from({ length: 44 }, (_, index) => ({
+        username: `employer_${index + 1}`,
+        email: `employer${index + 1}@example.com`,
         password: hashedPassword,
         role: employerRole,
-      },
-      {
-        username: 'employer_2',
-        email: 'employer2@example.com',
-        password: hashedPassword,
-        role: employerRole,
-      },
-      {
-        username: 'employer_3',
-        email: 'employer3@example.com',
-        password: hashedPassword,
-        role: employerRole,
-      },
-      {
-        username: 'employer_4',
-        email: 'employer4@example.com',
-        password: hashedPassword,
-        role: employerRole,
-      },
-      {
-        username: 'employer_5',
-        email: 'employer5@example.com',
-        password: hashedPassword,
-        role: employerRole,
-      },
-      {
-        username: 'employer_6',
-        email: 'employer6@example.com',
-        password: hashedPassword,
-        role: employerRole,
-      },
-      {
-        username: 'employer_7',
-        email: 'employer7@example.com',
-        password: hashedPassword,
-        role: employerRole,
-      },
-      {
-        username: 'employer_8',
-        email: 'employer8@example.com',
-        password: hashedPassword,
-        role: employerRole,
-      },
-      {
-        username: 'employer_9',
-        email: 'employer9@example.com',
-        password: hashedPassword,
-        role: employerRole,
-      },
-      {
-        username: 'employer_10',
-        email: 'employer10@example.com',
-        password: hashedPassword,
-        role: employerRole,
-      },
-      // 10 JOB SEEKER users
-      {
-        username: 'jobseeker_1',
-        email: 'jobseeker1@example.com',
+      })),
+      // 30 JOB SEEKER users
+      ...Array.from({ length: 30 }, (_, index) => ({
+        username: `jobseeker_${index + 1}`,
+        email: `jobseeker${index + 1}@example.com`,
         password: hashedPassword,
         role: jobSeekerRole,
-      },
-      {
-        username: 'jobseeker_2',
-        email: 'jobseeker2@example.com',
-        password: hashedPassword,
-        role: jobSeekerRole,
-      },
-      {
-        username: 'jobseeker_3',
-        email: 'jobseeker3@example.com',
-        password: hashedPassword,
-        role: jobSeekerRole,
-      },
-      {
-        username: 'jobseeker_4',
-        email: 'jobseeker4@example.com',
-        password: hashedPassword,
-        role: jobSeekerRole,
-      },
-      {
-        username: 'jobseeker_5',
-        email: 'jobseeker5@example.com',
-        password: hashedPassword,
-        role: jobSeekerRole,
-      },
-      {
-        username: 'jobseeker_6',
-        email: 'jobseeker6@example.com',
-        password: hashedPassword,
-        role: jobSeekerRole,
-      },
-      {
-        username: 'jobseeker_7',
-        email: 'jobseeker7@example.com',
-        password: hashedPassword,
-        role: jobSeekerRole,
-      },
-      {
-        username: 'jobseeker_8',
-        email: 'jobseeker8@example.com',
-        password: hashedPassword,
-        role: jobSeekerRole,
-      },
-      {
-        username: 'jobseeker_9',
-        email: 'jobseeker9@example.com',
-        password: hashedPassword,
-        role: jobSeekerRole,
-      },
-      {
-        username: 'jobseeker_10',
-        email: 'jobseeker10@example.com',
-        password: hashedPassword,
-        role: jobSeekerRole,
-      },
+      })),
     ];
 
     const result = await this.userRepo.save(users);

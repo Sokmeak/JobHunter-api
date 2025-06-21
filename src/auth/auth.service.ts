@@ -48,15 +48,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // const payload = { email: user.email, sub: user.id, role_id: user.role_id };
-    // this.logger.debug(`Login payload for ${email}: ${JSON.stringify(payload)}`);
-
     const payload = {
       id: user.id,
       email: user.email,
       role: user.role,
     };
-    // log(payload);
 
     return {
       access_token: this.jwtService.sign(payload, {
@@ -91,9 +87,9 @@ export class AuthService {
     // Assume you already have a `user` object after user creation
     if (userDto.role === 'JOB SEEKER') {
       const jobSeekerData: CreateJobSeekerDto = {
-        userId: user.id,
-        jobseeker_email: user.username,
-        jobseeker_name: user.email,
+        user_id: user.id,
+        jobseeker_email: user.email,
+        jobseeker_name: user.username,
         profile_image: '', // or null / undefined (optional)
         headline: 'Aspiring professional seeking new opportunities',
         bio: 'I am a passionate individual looking to grow in a dynamic company.',

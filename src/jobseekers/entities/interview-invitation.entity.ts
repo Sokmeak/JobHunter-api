@@ -1,9 +1,10 @@
 // interview-invitation.entity.ts
 import { Entity, Column, ManyToOne } from 'typeorm';
 import { JobSeeker } from './jobseeker.entity';
-import { Job } from './job.entity';
+
 import { Company } from 'src/companies/entities/company.entity';
 import { BaseEntity } from 'src/database/base.entity';
+import { Job } from 'src/companies/entities/job.entity';
 
 @Entity('interview_invitations')
 export class InterviewInvitation extends BaseEntity {

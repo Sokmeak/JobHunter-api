@@ -5,6 +5,8 @@ import {
   OneToOne,
   OneToMany,
   JoinColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { EducationHistory } from './education.entity';
 import { WorkExperience } from './experience.entity';
@@ -16,6 +18,8 @@ import { BaseEntity } from 'src/database/base.entity';
 import { Resume } from './resume.entity';
 import { SavedJob } from './saved-job.entity';
 import { JobApplication } from './application.entity';
+import { IsOptional } from 'class-validator';
+import { Job } from 'src/companies/entities/job.entity';
 
 @Entity('job_seekers')
 export class JobSeeker extends BaseEntity {
@@ -28,10 +32,10 @@ export class JobSeeker extends BaseEntity {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @Column()
+  @Column({ nullable: true })
   jobseeker_name: string;
 
-  @Column()
+  @Column({ nullable: true })
   jobseeker_email: string;
 
   @Column()
@@ -94,4 +98,9 @@ export class JobSeeker extends BaseEntity {
 
   @OneToMany(() => JobAlert, (alert) => alert.jobSeeker, { cascade: true })
   jobAlerts: JobAlert[];
+
+  // New Many-to-Many relationship with Job
+  @ManyToMany(() => Job, (job) => job.jobSeekers)
+  @JoinTable()
+  jobs: Job[];
 }

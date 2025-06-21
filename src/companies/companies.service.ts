@@ -923,7 +923,6 @@ export class CompaniesService {
     if (!company) throw new NotFoundException('Company not found');
 
     const job = this.jobRepository.create({
-      company_id: company.id,
       ...createJobDto,
       created_by: company.user_id,
     });

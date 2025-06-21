@@ -1,71 +1,92 @@
 import {
   IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsBoolean,
-  IsDateString,
+  IsInt,
   IsArray,
   IsObject,
-  IsInt,
+  IsBoolean,
+  IsOptional,
+  IsDateString,
 } from 'class-validator';
 
 export class CreateJobDto {
-  // @IsInt()
-  // @IsNotEmpty()
-  // company_id: number;
+  @IsInt()
+  company_id: number;
+
+  @IsInt()
+  created_by: number;
 
   @IsString()
-  @IsNotEmpty()
   title: string;
 
   @IsString()
-  @IsNotEmpty()
-  description: string;
-
   @IsOptional()
+  description?: string;
+
   @IsArray()
   @IsString({ each: true })
+  @IsOptional()
   responsibility?: string[];
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   qualification?: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   job_type?: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   skill_required?: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   salary_range?: string;
 
+  @IsString()
   @IsOptional()
+  location?: string;
+
+  @IsInt()
+  @IsOptional()
+  capacity?: number;
+
   @IsDateString()
+  @IsOptional()
+  posted_at?: string;
+
+  @IsDateString()
+  @IsOptional()
   expired_date?: string;
 
-  @IsOptional()
   @IsBoolean()
+  @IsOptional()
   is_visible?: boolean;
 
-  // Who You Are
+  @IsInt()
   @IsOptional()
+  views?: number;
+
+  @IsInt()
+  @IsOptional()
+  applicant_applied?: number;
+
   @IsArray()
   @IsString({ each: true })
+  @IsOptional()
   who_you_are?: string[];
 
-  // Nice-To-Haves
-  @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsOptional()
   nice_to_haves?: string[];
 
-  // Perks & Benefits
+  @IsString()
   @IsOptional()
+  level: string;
+
   @IsObject()
+  @IsOptional()
   perks_benefits?: {
     health_coverage?: string;
     learning_stipend?: string;
@@ -82,10 +103,6 @@ export class CreateJobDto {
     relocation_assistance?: string;
     professional_development?: string;
     employee_discounts?: string;
+    tool_access?: string;
   };
-
-  // Created By
-  @IsString()
-  @IsOptional()
-  created_by?: string;
 }

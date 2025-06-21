@@ -65,6 +65,9 @@ export class Company extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   hr_contact_email: string;
 
+  @Column({ type: 'text', array: true, nullable: true })
+  tags: string[];
+
   @Column({ type: 'text', nullable: true })
   headquarters_location: string;
 
@@ -92,8 +95,6 @@ export class Company extends BaseEntity {
   })
   officeLocations: OfficeLocation[];
 
-
-
   @Column({ type: 'text', array: true, nullable: true, default: '{}' })
   officeImages: string[]; // Stores all office image URLs
 
@@ -105,5 +106,3 @@ export class Company extends BaseEntity {
   @OneToMany(() => Job, (job) => job.company, { cascade: true })
   jobs: Job[];
 }
-
-
