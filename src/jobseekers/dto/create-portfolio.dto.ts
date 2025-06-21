@@ -1,5 +1,5 @@
 export class CreatePortfolioDto {
   title: string;
-  description: string;
   url: string;
+  description?: string;
 }

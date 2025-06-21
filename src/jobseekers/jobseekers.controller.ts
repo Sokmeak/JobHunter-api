@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import * as multer from 'multer'; // Ensure this import works
+import * as multer from 'multer';
 import { Express } from 'express';
 import { JobSeekersService } from './jobseekers.service';
 import { CreateJobSeekerDto } from './dto/create-jobseeker.dto';
@@ -28,6 +28,8 @@ import { CreateJobAlertDto } from './dto/create-job-alert.dto';
 import { AuthenticationGuard } from 'src/auth/guards/authentication/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/role.guard';
 import { log } from 'console';
+import { CreatePortfolioDto } from './dto/create-portfolio.dto';
+import { CreateSocialLinkDto } from './dto/create-social-link.dto';
 
 @Controller('job-seekers')
 export class JobSeekersController {
@@ -58,7 +60,7 @@ export class JobSeekersController {
   @Post('profile-image')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: multer.memoryStorage(), // Fixed import should resolve this
+      storage: multer.memoryStorage(),
       limits: { fileSize: 10 * 1024 * 1024 },
     }),
   )
@@ -112,7 +114,7 @@ export class JobSeekersController {
   }
 
   @Get('applications/:id/status')
-  getApplicationStatus(@Request() req, @Param('id') applicationId: string) {
+  getApplicationStatus(@Request() req, @Param('id') applicationId: number) {
     return this.jobSeekersService.getApplicationStatus(
       req.user.id,
       applicationId,
@@ -143,7 +145,7 @@ export class JobSeekersController {
   @Patch('interview-invitations/:id')
   updateInterviewInvitation(
     @Request() req,
-    @Param('id') invitationId: string,
+    @Param('id') invitationId: number,
     @Body() updateInterviewInvitationDto: UpdateInterviewInvitationDto,
   ) {
     return this.jobSeekersService.updateInterviewInvitation(
@@ -199,7 +201,7 @@ export class JobSeekersController {
   @Patch('work-experience/:id')
   updateWorkExperience(
     @Request() req,
-    @Param('id') experienceId: string,
+    @Param('id') experienceId: number,
     @Body() createWorkExperienceDto: CreateWorkExperienceDto,
   ) {
     return this.jobSeekersService.updateWorkExperience(
@@ -210,7 +212,7 @@ export class JobSeekersController {
   }
 
   @Delete('work-experience/:id')
-  deleteWorkExperience(@Request() req, @Param('id') experienceId: string) {
+  deleteWorkExperience(@Request() req, @Param('id') experienceId: number) {
     return this.jobSeekersService.deleteWorkExperience(
       req.user.id,
       experienceId,
@@ -233,7 +235,7 @@ export class JobSeekersController {
   }
 
   @Patch('notifications/:id/read')
-  markNotificationAsRead(@Request() req, @Param('id') notificationId: string) {
+  markNotificationAsRead(@Request() req, @Param('id') notificationId: number) {
     return this.jobSeekersService.markNotificationAsRead(
       req.user.id,
       notificationId,
@@ -251,5 +253,33 @@ export class JobSeekersController {
   @Get('job-alerts')
   getJobAlerts(@Request() req) {
     return this.jobSeekersService.getJobAlerts(req.user.id);
+  }
+
+  @Post('portfolios')
+  addPortfolio(@Request() req, @Body() createPortfolioDto: CreatePortfolioDto) {
+    return this.jobSeekersService.addPortfolio(req.user.id, createPortfolioDto);
+  }
+
+  @Patch('portfolios/:id')
+  updatePortfolio(
+    @Request() req,
+    @Param('id') portfolioId: number,
+    @Body() createPortfolioDto: CreatePortfolioDto,
+  ) {
+    return this.jobSeekersService.updatePortfolio(
+      req.user.id,
+      portfolioId,
+      createPortfolioDto,
+    );
+  }
+
+  @Delete('portfolios/:id')
+  deletePortfolio(@Request() req, @Param('id') portfolioId: number) {
+    return this.jobSeekersService.deletePortfolio(req.user.id, portfolioId);
+  }
+
+  @Post('social-links')
+  saveSocialLinks(@Request() req, @Body() socialLinks: CreateSocialLinkDto[]) {
+    return this.jobSeekersService.saveSocialLinks(req.user.id, socialLinks);
   }
 }

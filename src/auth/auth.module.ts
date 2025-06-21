@@ -37,6 +37,8 @@ import { SkillTag } from 'src/jobseekers/entities/skill.entity';
 import { InterviewInvitation } from 'src/jobseekers/entities/interview-invitation.entity';
 import { JobAlert } from 'src/jobseekers/entities/job-alert.entity';
 import { Notification } from 'src/companies/entities/notification.entity';
+import { Portfolio } from 'src/jobseekers/entities/portfolio.entity';
+import { SocialLink } from 'src/jobseekers/entities/social-link.entity';
 @Module({
   imports: [
     PassportModule,
@@ -64,6 +66,8 @@ import { Notification } from 'src/companies/entities/notification.entity';
       SkillTag,
       Notification_Applicant,
       InterviewInvitation,
+      Portfolio,
+      SocialLink,
       JobAlert,
     ]), // This makes RoleRepository available
     forwardRef(() => UsersModule),

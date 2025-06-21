@@ -92,8 +92,8 @@ export class AuthService {
     if (userDto.role === 'JOB SEEKER') {
       const jobSeekerData: CreateJobSeekerDto = {
         userId: user.id,
-        jobseeker_email: user.username,
-        jobseeker_name: user.email,
+        jobseeker_email: user.email,
+        jobseeker_name: user.username,
         profile_image: '', // or null / undefined (optional)
         headline: 'Aspiring professional seeking new opportunities',
         bio: 'I am a passionate individual looking to grow in a dynamic company.',

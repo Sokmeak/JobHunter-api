@@ -15,5 +15,6 @@ export const databaseConfig: TypeOrmModuleOptions & DataSourceOptions = {
   migrations: [__dirname + '/../database/migrations/*.{ts,js}'], // Good
   synchronize: true, // Set to false in production
   migrationsRun: false,
+
   autoLoadEntities: true, // Handy for NestJS
 };

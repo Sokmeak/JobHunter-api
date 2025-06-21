@@ -16,6 +16,8 @@ import { BaseEntity } from 'src/database/base.entity';
 import { Resume } from './resume.entity';
 import { SavedJob } from './saved-job.entity';
 import { JobApplication } from './application.entity';
+import { Portfolio } from './portfolio.entity';
+import { SocialLink } from './social-link.entity';
 
 @Entity('job_seekers')
 export class JobSeeker extends BaseEntity {
@@ -86,6 +88,12 @@ export class JobSeeker extends BaseEntity {
 
   @OneToMany(() => SkillTag, (skill) => skill.jobSeeker, { cascade: true })
   skillTags: SkillTag[];
+
+  @OneToMany(() => Portfolio, (portfolio) => portfolio.jobSeeker)
+  portfolios: Portfolio[];
+
+  @OneToMany(() => SocialLink, (socialLink) => socialLink.jobSeeker)
+  socialLinks: SocialLink[];
 
   @OneToMany(() => InterviewInvitation, (invitation) => invitation.jobSeeker, {
     cascade: true,
