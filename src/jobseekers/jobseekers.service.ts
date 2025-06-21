@@ -36,10 +36,13 @@ import { log } from 'console';
 import { Portfolio } from './entities/portfolio.entity';
 import { SocialLink } from './entities/social-link.entity';
 import { CreatePortfolioDto } from './dto/create-portfolio.dto';
-import { CreateSocialLinkDto } from './dto/create-social-link.dto';
+import { UpdateSocialLinkDto } from './dto/create-social-link.dto';
 
 @Injectable()
 export class JobSeekersService {
+  getPortfolios(id: any) {
+    throw new Error('Method not implemented.');
+  }
   constructor(
     @InjectRepository(JobSeeker)
     private jobSeekerRepository: Repository<JobSeeker>,
@@ -74,13 +77,15 @@ export class JobSeekersService {
     private filesService: FilesService,
   ) {}
 
-  async createJobSeeker(userId: number, dto: CreateJobSeekerDto): Promise<JobSeeker> {
+  async createJobSeeker(
+    userId: number,
+    dto: CreateJobSeekerDto,
+  ): Promise<JobSeeker> {
     if (dto.user_id !== userId) {
       throw new Error('userId mismatch');
     }
 
     const jobSeeker = this.jobSeekerRepository.create({
-      
       ...dto,
       educationHistory: [],
       workExperience: [],
@@ -178,6 +183,20 @@ export class JobSeekersService {
     return jobSeeker;
   }
 
+  async getResume(userId: number): Promise<Resume> {
+    // Find the resume by ID and ensure it belongs to the authenticated user
+    const resumes = await this.resumeRepository.findOne({
+      where: { job_seeker_id: userId },
+    });
+
+    log('Resumes: ', resumes);
+
+    if (!resumes) {
+      throw new NotFoundException('Resume not found or access denied');
+    }
+
+    return resumes;
+  }
   async uploadResume(
     userId: number,
     file: Express.Multer.File,
@@ -368,6 +387,14 @@ export class JobSeekersService {
     return updatedInvitation;
   }
 
+  async getEducationHistory(userId: number) {
+    const jobSeeker = await this.jobSeekerRepository.findOne({
+      where: { user_id: userId },
+      relations: ['educationHistory'],
+    });
+    if (!jobSeeker) throw new NotFoundException('Job seeker not found');
+    return jobSeeker.educationHistory || [];
+  }
   async addEducationHistory(
     userId: number,
     createEducationHistoryDto: CreateEducationHistoryDto,
@@ -448,28 +475,34 @@ export class JobSeekersService {
     await this.workExperienceRepository.remove(experience);
   }
 
-  async addSkillTag(
-    userId: number,
-    createSkillTagDto: CreateSkillTagDto,
-  ): Promise<SkillTag> {
+  async getSkillTags(userId: number): Promise<SkillTag[]> {
+    const jobSeeker = await this.jobSeekerRepository.findOne({
+      where: { user_id: userId },
+      relations: ['skillTags'],
+    });
+    if (!jobSeeker) throw new NotFoundException('Job seeker not found');
+    return jobSeeker.skillTags || [];
+  }
+
+  async addSkillTag(userId: number, dto: CreateSkillTagDto): Promise<SkillTag> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
       where: { user_id: userId },
     });
     if (!jobSeeker) throw new NotFoundException('Job seeker not found');
-
-    const skill = this.skillTagRepository.create({
-      job_seeker_id: userId,
-      ...createSkillTagDto,
+    const skillTag = this.skillTagRepository.create({
+      skill_name: dto.skill_name,
+      jobSeeker,
+      job_seeker_id: jobSeeker.id,
     });
-    return this.skillTagRepository.save(skill);
+    return this.skillTagRepository.save(skillTag);
   }
 
-  async deleteSkillTag(userId: number, skillId: number): Promise<void> {
-    const skill = await this.skillTagRepository.findOne({
-      where: { id: skillId, job_seeker_id: userId },
+  async deleteSkillTag(userId: number, skillTagId: number): Promise<void> {
+    const skillTag = await this.skillTagRepository.findOne({
+      where: { id: skillTagId, job_seeker_id: userId },
     });
-    if (!skill) throw new NotFoundException('Skill tag not found');
-    await this.skillTagRepository.remove(skill);
+    if (!skillTag) throw new NotFoundException('Skill tag not found');
+    await this.skillTagRepository.remove(skillTag);
   }
 
   async getNotifications(userId: number): Promise<Notification_Applicant[]> {
@@ -554,25 +587,51 @@ export class JobSeekersService {
     await this.portfolioRepository.remove(portfolio);
   }
 
-  async saveSocialLinks(
+  async getSocialLinks(userId: number): Promise<SocialLink[]> {
+    const jobSeeker = await this.jobSeekerRepository.findOne({
+      where: { user_id: userId },
+      relations: ['socialLinks'],
+    });
+    if (!jobSeeker) throw new NotFoundException('Job seeker not found');
+    return jobSeeker.socialLinks || [];
+  }
+
+  async addSocialLink(
     userId: number,
-    socialLinks: CreateSocialLinkDto[],
-  ): Promise<SocialLink[]> {
+    dto: { url: string; platform?: string },
+  ): Promise<SocialLink> {
     const jobSeeker = await this.jobSeekerRepository.findOne({
       where: { user_id: userId },
     });
     if (!jobSeeker) throw new NotFoundException('Job seeker not found');
+    const socialLink = this.socialLinkRepository.create({
+      job_seeker_id: jobSeeker.id,
+      jobSeeker,
+      url: dto.url,
+      platform: dto.platform,
+    });
+    return this.socialLinkRepository.save(socialLink);
+  }
 
-    // Delete existing social links
-    await this.socialLinkRepository.delete({ job_seeker_id: userId });
+  // DELETE all social links
+  async deleteSocialLink(userId: number, socialLinkId: number): Promise<void> {
+    const socialLink = await this.socialLinkRepository.findOne({
+      where: { id: socialLinkId, job_seeker_id: userId },
+    });
+    if (!socialLink) throw new NotFoundException('Social link not found');
+    await this.socialLinkRepository.remove(socialLink);
+  }
 
-    // Create new social links
-    const newLinks = socialLinks.map((link) =>
-      this.socialLinkRepository.create({
-        job_seeker_id: userId,
-        ...link,
-      }),
-    );
-    return this.socialLinkRepository.save(newLinks);
+  async updateSocialLink(
+    userId: number,
+    socialLinkId: number,
+    updateSocialLinkDto: UpdateSocialLinkDto,
+  ): Promise<SocialLink> {
+    const socialLink = await this.socialLinkRepository.findOne({
+      where: { id: socialLinkId, job_seeker_id: userId },
+    });
+    if (!socialLink) throw new NotFoundException('Social link not found');
+    Object.assign(socialLink, updateSocialLinkDto);
+    return this.socialLinkRepository.save(socialLink);
   }
 }

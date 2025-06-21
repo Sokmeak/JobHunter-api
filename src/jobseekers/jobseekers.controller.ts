@@ -1,3 +1,4 @@
+
 import {
   Controller,
   Post,
@@ -7,13 +8,13 @@ import {
   Patch,
   UseInterceptors,
   UploadedFile,
-  Request,
+  Req,
   Delete,
   UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as multer from 'multer';
-import { Express } from 'express';
 import { JobSeekersService } from './jobseekers.service';
 import { CreateJobSeekerDto } from './dto/create-jobseeker.dto';
 import { CreateResumeDto } from './dto/create-resume.dto';
@@ -29,56 +30,60 @@ import { AuthenticationGuard } from 'src/auth/guards/authentication/jwt-auth.gua
 import { RolesGuard } from 'src/auth/guards/role.guard';
 import { log } from 'console';
 import { CreatePortfolioDto } from './dto/create-portfolio.dto';
-import { CreateSocialLinkDto } from './dto/create-social-link.dto';
+import { UpdateSocialLinkDto } from './dto/create-social-link.dto';
 
 @Controller('job-seekers')
 export class JobSeekersController {
   constructor(private readonly jobSeekersService: JobSeekersService) {}
 
   @Post('profile')
-  createProfile(
-    @Request() req,
-    @Body() createJobSeekerDto: CreateJobSeekerDto,
-  ) {
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  createProfile(@Req() req, @Body() createJobSeekerDto: CreateJobSeekerDto) {
     return this.jobSeekersService.createJobSeeker(
-      req.user.id,
+      (req.user as any).id,
       createJobSeekerDto,
     );
   }
 
   @Patch('profile')
-  updateProfile(
-    @Request() req,
-    @Body() createJobSeekerDto: CreateJobSeekerDto,
-  ) {
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  updateProfile(@Req() req, @Body() createJobSeekerDto: CreateJobSeekerDto) {
     return this.jobSeekersService.updateJobSeeker(
-      req.user.id,
+      (req.user as any).id,
       createJobSeekerDto,
     );
   }
 
   @Post('profile-image')
+  @UseGuards(AuthenticationGuard, RolesGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: multer.memoryStorage(),
       limits: { fileSize: 10 * 1024 * 1024 },
     }),
   )
-  uploadProfileImage(
-    @Request() req,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    return this.jobSeekersService.uploadProfileImage(req.user.id, file);
+  uploadProfileImage(@Req() req, @UploadedFile() file: Express.Multer.File) {
+    return this.jobSeekersService.uploadProfileImage(
+      (req.user as any).id,
+      file,
+    );
   }
 
   @Get('profile')
   @UseGuards(AuthenticationGuard, RolesGuard)
-  getProfile(@Request() req) {
-    log(req.user.id);
-    return this.jobSeekersService.getJobSeeker(req.user.id);
+  getProfile(@Req() req) {
+    log((req.user as any).id);
+    return this.jobSeekersService.getJobSeeker((req.user as any).id);
+  }
+
+  @Get('resumes')
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  getResume(@Req() req) {
+    return this.jobSeekersService.getResume((req.user as any).id);
   }
 
   @Post('resumes')
+  @UseGuards(AuthenticationGuard, RolesGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: multer.memoryStorage(),
@@ -86,7 +91,7 @@ export class JobSeekersController {
     }),
   )
   uploadResume(
-    @Request() req,
+    @Req() req,
     @UploadedFile() file: Express.Multer.File,
     @Body() createResumeDto: CreateResumeDto,
   ) {
@@ -98,188 +103,283 @@ export class JobSeekersController {
   }
 
   @Delete('resumes/:id')
-  deleteResume(@Request() req, @Param('id') resumeId: number) {
-    return this.jobSeekersService.deleteResume(req.user.id, resumeId);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  deleteResume(@Req() req, @Param('id') resumeId: number) {
+    return this.jobSeekersService.deleteResume((req.user as any).id, resumeId);
   }
 
   @Post('applications')
+  @UseGuards(AuthenticationGuard, RolesGuard)
   applyForJob(
-    @Request() req,
+    @Req() req,
     @Body() createJobApplicationDto: CreateJobApplicationDto,
   ) {
     return this.jobSeekersService.applyForJob(
-      req.user.id,
+      (req.user as any).id,
       createJobApplicationDto,
     );
   }
 
   @Get('applications/:id/status')
-  getApplicationStatus(@Request() req, @Param('id') applicationId: number) {
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  getApplicationStatus(@Req() req, @Param('id') applicationId: number) {
     return this.jobSeekersService.getApplicationStatus(
-      req.user.id,
+      (req.user as any).id,
       applicationId,
     );
   }
 
   @Post('saved-jobs')
-  saveJob(@Request() req, @Body() createSavedJobDto: CreateSavedJobDto) {
-    return this.jobSeekersService.saveJob(req.user.id, createSavedJobDto);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  saveJob(@Req() req, @Body() createSavedJobDto: CreateSavedJobDto) {
+    return this.jobSeekersService.saveJob(
+      (req.user as any).id,
+      createSavedJobDto,
+    );
   }
 
   @Post('interview-preferences')
+  @UseGuards(AuthenticationGuard, RolesGuard)
   setInterviewPreference(
-    @Request() req,
+    @Req() req,
     @Body() createInterviewPreferenceDto: CreateInterviewPreferenceDto,
   ) {
     return this.jobSeekersService.setInterviewPreference(
-      req.user.id,
+      (req.user as any).id,
       createInterviewPreferenceDto,
     );
   }
 
   @Get('interview-invitations')
-  getInterviewInvitations(@Request() req) {
-    return this.jobSeekersService.getInterviewInvitations(req.user.id);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  getInterviewInvitations(@Req() req) {
+    return this.jobSeekersService.getInterviewInvitations((req.user as any).id);
   }
 
   @Patch('interview-invitations/:id')
+  @UseGuards(AuthenticationGuard, RolesGuard)
   updateInterviewInvitation(
-    @Request() req,
+    @Req() req,
     @Param('id') invitationId: number,
     @Body() updateInterviewInvitationDto: UpdateInterviewInvitationDto,
   ) {
     return this.jobSeekersService.updateInterviewInvitation(
-      req.user.id,
+      (req.user as any).id,
       invitationId,
       updateInterviewInvitationDto,
     );
   }
 
+  @Get('education-history')
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async getEducationHistory(@Req() req: Express.Request) {
+    return this.jobSeekersService.getEducationHistory((req.user as any).id);
+  }
+  
   @Post('education-history')
+  @UseGuards(AuthenticationGuard, RolesGuard)
   addEducationHistory(
-    @Request() req,
+    @Req() req,
     @Body() createEducationHistoryDto: CreateEducationHistoryDto,
   ) {
     return this.jobSeekersService.addEducationHistory(
-      req.user.id,
+      (req.user as any).id,
       createEducationHistoryDto,
     );
   }
 
   @Patch('education-history/:id')
+  @UseGuards(AuthenticationGuard, RolesGuard)
   updateEducationHistory(
-    @Request() req,
+    @Req() req,
     @Param('id') educationId: number,
     @Body() createEducationHistoryDto: CreateEducationHistoryDto,
   ) {
     return this.jobSeekersService.updateEducationHistory(
-      req.user.id,
+      (req.user as any).id,
       educationId,
       createEducationHistoryDto,
     );
   }
 
   @Delete('education-history/:id')
-  deleteEducationHistory(@Request() req, @Param('id') educationId: number) {
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  deleteEducationHistory(@Req() req, @Param('id') educationId: number) {
     return this.jobSeekersService.deleteEducationHistory(
-      req.user.id,
+      (req.user as any).id,
       educationId,
     );
   }
 
   @Post('work-experience')
+  @UseGuards(AuthenticationGuard, RolesGuard)
   addWorkExperience(
-    @Request() req,
+    @Req() req,
     @Body() createWorkExperienceDto: CreateWorkExperienceDto,
   ) {
     return this.jobSeekersService.addWorkExperience(
-      req.user.id,
+      (req.user as any).id,
       createWorkExperienceDto,
     );
   }
 
   @Patch('work-experience/:id')
+  @UseGuards(AuthenticationGuard, RolesGuard)
   updateWorkExperience(
-    @Request() req,
+    @Req() req,
     @Param('id') experienceId: number,
     @Body() createWorkExperienceDto: CreateWorkExperienceDto,
   ) {
     return this.jobSeekersService.updateWorkExperience(
-      req.user.id,
+      (req.user as any).id,
       experienceId,
       createWorkExperienceDto,
     );
   }
 
   @Delete('work-experience/:id')
-  deleteWorkExperience(@Request() req, @Param('id') experienceId: number) {
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  deleteWorkExperience(@Req() req, @Param('id') experienceId: number) {
     return this.jobSeekersService.deleteWorkExperience(
-      req.user.id,
+      (req.user as any).id,
       experienceId,
     );
   }
 
+  @Get('skill-tags')
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async getSkillTags(@Req() req) {
+    const skills = await this.jobSeekersService.getSkillTags(
+      (req.user as any).id,
+    );
+    return { skills }; // <-- wrap in object
+  }
+
   @Post('skill-tags')
-  addSkillTag(@Request() req, @Body() createSkillTagDto: CreateSkillTagDto) {
-    return this.jobSeekersService.addSkillTag(req.user.id, createSkillTagDto);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  addSkillTag(
+    @Req() req: Express.Request,
+    @Body() createSkillTagDto: CreateSkillTagDto,
+  ) {
+    if (!req.user || !(req.user as any).id) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+    return this.jobSeekersService.addSkillTag(
+      (req.user as any).id,
+      createSkillTagDto,
+    );
   }
 
   @Delete('skill-tags/:id')
-  deleteSkillTag(@Request() req, @Param('id') skillId: number) {
-    return this.jobSeekersService.deleteSkillTag(req.user.id, skillId);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async deleteSkillTag(@Req() req, @Param('id') id: number) {
+    await this.jobSeekersService.deleteSkillTag(
+      (req.user as any).id,
+      Number(id),
+    );
+    return { message: 'Skill tag deleted successfully' };
   }
 
   @Get('notifications')
-  getNotifications(@Request() req) {
-    return this.jobSeekersService.getNotifications(req.user.id);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  getNotifications(@Req() req) {
+    return this.jobSeekersService.getNotifications((req.user as any).id);
   }
 
   @Patch('notifications/:id/read')
-  markNotificationAsRead(@Request() req, @Param('id') notificationId: number) {
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  markNotificationAsRead(@Req() req, @Param('id') notificationId: number) {
     return this.jobSeekersService.markNotificationAsRead(
-      req.user.id,
+      (req.user as any).id,
       notificationId,
     );
   }
 
   @Post('job-alerts')
-  createJobAlert(@Request() req, @Body() createJobAlertDto: CreateJobAlertDto) {
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  createJobAlert(@Req() req, @Body() createJobAlertDto: CreateJobAlertDto) {
     return this.jobSeekersService.createJobAlert(
-      req.user.id,
+      (req.user as any).id,
       createJobAlertDto,
     );
   }
 
   @Get('job-alerts')
-  getJobAlerts(@Request() req) {
-    return this.jobSeekersService.getJobAlerts(req.user.id);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  getJobAlerts(@Req() req) {
+    return this.jobSeekersService.getJobAlerts((req.user as any).id);
   }
 
   @Post('portfolios')
-  addPortfolio(@Request() req, @Body() createPortfolioDto: CreatePortfolioDto) {
-    return this.jobSeekersService.addPortfolio(req.user.id, createPortfolioDto);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  addPortfolio(@Req() req, @Body() createPortfolioDto: CreatePortfolioDto) {
+    return this.jobSeekersService.addPortfolio(
+      (req.user as any).id,
+      createPortfolioDto,
+    );
+  }
+
+  @Get('portfolios')
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  getPortfolios(@Req() req) {
+    return this.jobSeekersService.getPortfolios((req.user as any).id);
   }
 
   @Patch('portfolios/:id')
+  @UseGuards(AuthenticationGuard, RolesGuard)
   updatePortfolio(
-    @Request() req,
+    @Req() req,
     @Param('id') portfolioId: number,
     @Body() createPortfolioDto: CreatePortfolioDto,
   ) {
     return this.jobSeekersService.updatePortfolio(
-      req.user.id,
+      (req.user as any).id,
       portfolioId,
       createPortfolioDto,
     );
   }
 
   @Delete('portfolios/:id')
-  deletePortfolio(@Request() req, @Param('id') portfolioId: number) {
-    return this.jobSeekersService.deletePortfolio(req.user.id, portfolioId);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  deletePortfolio(@Req() req, @Param('id') portfolioId: number) {
+    return this.jobSeekersService.deletePortfolio(
+      (req.user as any).id,
+      portfolioId,
+    );
   }
 
   @Post('social-links')
-  saveSocialLinks(@Request() req, @Body() socialLinks: CreateSocialLinkDto[]) {
-    return this.jobSeekersService.saveSocialLinks(req.user.id, socialLinks);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  addSocialLink(@Req() req, @Body() body: { url: string; platform?: string }) {
+    return this.jobSeekersService.addSocialLink((req.user as any).id, body);
+  }
+
+  @Get('social-links')
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  getSocialLinks(@Req() req) {
+    return this.jobSeekersService.getSocialLinks((req.user as any).id);
+  }
+
+  @Patch('social-links/:id') // Updated method name to match intent
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  updateSocialLink(
+    @Req() req,
+    @Param('id') socialLinkId: number,
+    @Body() updateSocialLinkDto: UpdateSocialLinkDto,
+  ) {
+    return this.jobSeekersService.updateSocialLink(
+      (req.user as any).id,
+      socialLinkId,
+      updateSocialLinkDto,
+    );
+  }
+
+  @Delete('social-links/:id')
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  deleteSocialLink(@Req() req, @Param('id') socialLinkId: number) {
+    return this.jobSeekersService.deleteSocialLink(
+      (req.user as any).id,
+      socialLinkId,
+    );
   }
 }

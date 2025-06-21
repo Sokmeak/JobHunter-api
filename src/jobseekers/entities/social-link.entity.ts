@@ -1,16 +1,15 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
 import { JobSeeker } from './jobseeker.entity';
+import { BaseEntity } from 'src/database/base.entity';
 
 @Entity()
-export class SocialLink {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class SocialLink extends BaseEntity{
+
 
   @Column()
   job_seeker_id: number;

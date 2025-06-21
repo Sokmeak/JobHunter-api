@@ -14,8 +14,9 @@ export const databaseConfig: TypeOrmModuleOptions & DataSourceOptions = {
   entities: [__dirname + '/../**/*.entity.{ts,js}'], // Correct for NestJS structure
   migrations: [__dirname + '/../database/migrations/*.{ts,js}'], // Good
   synchronize: true, // Set to false in production
-  dropSchema: false,
+  // dropSchema: true,
   migrationsRun: false,
-
+ // Set to true if you want to drop the schema on every application launch
+  // Set to true if you want to drop the schema on every application launcht
   autoLoadEntities: true, // Handy for NestJS
 };

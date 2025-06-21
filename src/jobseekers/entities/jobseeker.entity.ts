@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { EducationHistory } from './education.entity';
 import { WorkExperience } from './experience.entity';
-import { SkillTag } from './skill.entity';
+
 import { InterviewInvitation } from './interview-invitation.entity';
 import { JobAlert } from './job-alert.entity';
 import { InterviewPreference } from './interview-preference.entity';
@@ -20,11 +20,9 @@ import { Resume } from './resume.entity';
 import { SavedJob } from './saved-job.entity';
 import { Portfolio } from './portfolio.entity';
 import { SocialLink } from './social-link.entity';
-import { IsOptional } from 'class-validator';
 import { Job } from 'src/companies/entities/job.entity';
-
+import { SkillTag } from './skill.entity';
 import { JobApplication } from './application.entity';
-
 
 @Entity('job_seekers')
 export class JobSeeker extends BaseEntity {
@@ -93,7 +91,7 @@ export class JobSeeker extends BaseEntity {
   })
   workExperience: WorkExperience[];
 
-  @OneToMany(() => SkillTag, (skill) => skill.jobSeeker, { cascade: true })
+  @OneToMany(() => SkillTag, (skillTag) => skillTag.jobSeeker)
   skillTags: SkillTag[];
 
   @OneToMany(() => Portfolio, (portfolio) => portfolio.jobSeeker)
