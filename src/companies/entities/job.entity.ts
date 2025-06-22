@@ -94,6 +94,9 @@ export class Job extends BaseEntity {
   @Column({ type: 'text', array: true, nullable: true })
   tags: string[];
 
+
+  
+
   @Column({ type: 'jsonb', nullable: true })
   perks_benefits: {
     health_coverage?: string;

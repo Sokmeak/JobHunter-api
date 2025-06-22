@@ -13,13 +13,13 @@ export class JobsSeeder {
   ) {}
 
   async run(): Promise<Job[]> {
-    // Filter EMPLOYER users (need at least 24 to cover all jobs)
+    // Filter EMPLOYER users (need at least 25 to cover all jobs)
     const employerUsers = this.users.filter(
       (user) => user.role.type === RoleENUM.EMPLOYER,
     );
 
     // Validate that we have enough EMPLOYER users
-    if (employerUsers.length < 24 || employerUsers.some((user) => !user.id)) {
+    if (employerUsers.length < 25 || employerUsers.some((user) => !user.id)) {
       throw new Error(
         'Insufficient or invalid EMPLOYER users for seeding jobs',
       );
@@ -27,12 +27,12 @@ export class JobsSeeder {
 
     // Fetch companies to associate with jobs
     const companies = await this.companyRepository.find();
-    if (companies.length < 24) {
+    if (companies.length < 25) {
       throw new Error('Insufficient companies for seeding jobs');
     }
 
     const jobs: Partial<Job>[] = [
-      // Five jobs for Nomad (company[0])
+      // Existing jobs (24 jobs)
       {
         company_id:
           companies.find((c) => c.name === 'Nomad')?.id || companies[0].id,
@@ -199,7 +199,6 @@ export class JobsSeeder {
         level: 'entry level',
         tags: ['support'],
       },
-      // Remaining jobs distributed across other companies
       {
         company_id:
           companies.find((c) => c.name === 'Dropbox')?.id || companies[1].id,
@@ -824,6 +823,172 @@ export class JobsSeeder {
         },
         level: 'senior level',
         tags: ['engineering', 'technology'],
+      },
+      // New jobs for Airtable (5 jobs)
+      {
+        company_id:
+          companies.find((c) => c.name === 'Airtable')?.id || companies[20].id,
+        created_by: employerUsers[20].id,
+        title: 'Backend Engineer',
+        description:
+          'Develop and maintain backend systems for Airtable in San Francisco, USA.',
+        responsibility: [
+          'Build scalable APIs',
+          'Optimize database performance',
+          'Collaborate with frontend teams',
+        ],
+        qualification: '4+ years in backend development',
+        job_type: 'full-time',
+        skill_required: 'Node.js, GraphQL, PostgreSQL',
+        salary_range: '$3000 or above',
+        location: 'San Francisco, USA',
+        capacity: 8,
+        posted_at: '2025-06-25T00:00:00Z',
+        expired_date: '2025-07-25T00:00:00Z',
+        is_visible: true,
+        views: 0,
+        applicant_applied: 0,
+        who_you_are: ['Technical', 'Problem solver', 'Collaborative'],
+        nice_to_haves: ['Experience with MongoDB', 'Microservices knowledge'],
+        perks_benefits: {
+          health_coverage: 'Comprehensive health insurance',
+          stock_options: 'Equity package',
+          remote_work: 'Hybrid work options',
+        },
+        level: 'senior level',
+        tags: ['engineering', 'technology'],
+      },
+      {
+        company_id:
+          companies.find((c) => c.name === 'Airtable')?.id || companies[20].id,
+        created_by: employerUsers[20].id,
+        title: 'Product Marketing Manager',
+        description:
+          'Drive product marketing strategies for Airtable in San Francisco, USA.',
+        responsibility: [
+          'Develop marketing campaigns',
+          'Analyze market trends',
+          'Collaborate with product teams',
+        ],
+        qualification: '4+ years in product marketing',
+        job_type: 'full-time',
+        skill_required: 'Marketing, Analytics, Communication',
+        salary_range: '$1500 - $2000',
+        location: 'San Francisco, USA',
+        capacity: 6,
+        posted_at: '2025-06-26T00:00:00Z',
+        expired_date: '2025-07-26T00:00:00Z',
+        is_visible: true,
+        views: 0,
+        applicant_applied: 2,
+        who_you_are: ['Strategic', 'Creative', 'Data-driven'],
+        nice_to_haves: ['Experience with SaaS products', 'SEO expertise'],
+        perks_benefits: {
+          health_coverage: 'Health and dental insurance',
+          paid_time_off: '20 days PTO',
+          professional_development: '$2,000 learning stipend',
+        },
+        level: 'senior level',
+        tags: ['marketing'],
+      },
+      {
+        company_id:
+          companies.find((c) => c.name === 'Airtable')?.id || companies[20].id,
+        created_by: employerUsers[20].id,
+        title: 'Technical Writer',
+        description:
+          'Create technical documentation for Airtable’s products in Remote.',
+        responsibility: [
+          'Write user guides',
+          'Document APIs',
+          'Collaborate with engineering teams',
+        ],
+        qualification: '2+ years in technical writing',
+        job_type: 'part-time',
+        skill_required: 'Technical Writing, Documentation, Communication',
+        salary_range: '$500 - $1000',
+        location: 'Remote',
+        capacity: 5,
+        posted_at: '2025-06-27T00:00:00Z',
+        expired_date: '2025-07-27T00:00:00Z',
+        is_visible: true,
+        views: 0,
+        applicant_applied: 1,
+        who_you_are: ['Detail-oriented', 'Communicative', 'Technical'],
+        nice_to_haves: ['Experience with Markdown', 'API documentation skills'],
+        perks_benefits: {
+          health_coverage: 'Partial health coverage',
+          flexible_hours: 'Flexible schedule',
+          remote_work: 'Fully remote',
+        },
+        level: 'entry level',
+        tags: ['documentation', 'technology'],
+      },
+      {
+        company_id:
+          companies.find((c) => c.name === 'Airtable')?.id || companies[20].id,
+        created_by: employerUsers[20].id,
+        title: 'Security Engineer',
+        description:
+          'Ensure the security of Airtable’s platforms in San Francisco, USA.',
+        responsibility: [
+          'Conduct security audits',
+          'Implement security measures',
+          'Collaborate with DevOps teams',
+        ],
+        qualification: '5+ years in cybersecurity',
+        job_type: 'full-time',
+        skill_required: 'Cybersecurity, Penetration Testing, Cloud Security',
+        salary_range: '$3000 or above',
+        location: 'San Francisco, USA',
+        capacity: 7,
+        posted_at: '2025-06-28T00:00:00Z',
+        expired_date: '2025-07-28T00:00:00Z',
+        is_visible: true,
+        views: 0,
+        applicant_applied: 0,
+        who_you_are: ['Analytical', 'Proactive', 'Technical'],
+        nice_to_haves: ['Experience with SOC2', 'Knowledge of compliance'],
+        perks_benefits: {
+          health_coverage: 'Comprehensive health insurance',
+          stock_options: 'Equity package',
+          wellness_program: 'Wellness stipend',
+        },
+        level: 'senior level',
+        tags: ['engineering', 'security'],
+      },
+      {
+        company_id:
+          companies.find((c) => c.name === 'Airtable')?.id || companies[20].id,
+        created_by: employerUsers[20].id,
+        title: 'Customer Support Lead',
+        description:
+          'Lead the customer support team for Airtable in Remote.',
+        responsibility: [
+          'Manage support team',
+          'Handle escalations',
+          'Improve support processes',
+        ],
+        qualification: '4+ years in customer support leadership',
+        job_type: 'full-time',
+        skill_required: 'Customer Service, Leadership, CRM',
+        salary_range: '$1500 - $2000',
+        location: 'Remote',
+        capacity: 6,
+        posted_at: '2025-06-29T00:00:00Z',
+        expired_date: '2025-07-29T00:00:00Z',
+        is_visible: true,
+        views: 0,
+        applicant_applied: 3,
+        who_you_are: ['Empathetic', 'Organized', 'Leader'],
+        nice_to_haves: ['Experience with Intercom', 'Multilingual'],
+        perks_benefits: {
+          health_coverage: 'Health insurance',
+          flexible_hours: 'Flexible schedule',
+          remote_work: 'Fully remote',
+        },
+        level: 'manager',
+        tags: ['support'],
       },
     ];
 

@@ -9,11 +9,11 @@ import {
 } from 'class-validator';
 
 export class CreateJobDto {
-  @IsInt()
-  company_id: number;
+  // @IsInt()
+  // company_id: number;
 
-  @IsInt()
-  created_by: number;
+  // @IsInt()
+  // created_by: number;
 
   @IsString()
   title: string;
@@ -84,6 +84,10 @@ export class CreateJobDto {
   @IsString()
   @IsOptional()
   level: string;
+
+  @IsArray()
+  @IsOptional()
+  tags: string[];
 
   @IsObject()
   @IsOptional()

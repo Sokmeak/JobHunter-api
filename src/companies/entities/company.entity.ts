@@ -68,7 +68,7 @@ export class Company extends BaseEntity {
   @Column({ type: 'text', array: true, nullable: true })
   tags: string[];
   @Column({ type: 'text', array: true, nullable: true })
- benefits: string[];
+  benefits: string[];
   @Column({ type: 'text', nullable: true })
   headquarters_location: string;
 

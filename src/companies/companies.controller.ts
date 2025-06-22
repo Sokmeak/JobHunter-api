@@ -107,6 +107,12 @@ export class CompaniesController {
 
   // all jobs belong to a company
 
+  @Post('jobs')
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  createJob(@Body() createJobDto: CreateJobDto, @Req() req: any) {
+    return this.companiesService.createJob(req.user.id, createJobDto);
+  }
+
   @Get('jobs')
   @UseGuards(AuthenticationGuard, RolesGuard)
   getJobs(
@@ -331,12 +337,6 @@ export class CompaniesController {
   @UseGuards(AuthenticationGuard, RolesGuard)
   deleteCompanyDocument(@Param('id') id: string, @Req() req: any) {
     return this.companiesService.deleteCompanyDocument(req.user.id, +id);
-  }
-
-  @Post('jobs')
-  @UseGuards(AuthenticationGuard, RolesGuard)
-  createJob(@Body() createJobDto: CreateJobDto, @Req() req: any) {
-    return this.companiesService.createJob(req.user.id, createJobDto);
   }
 
   @Put('jobs/:jobId')
