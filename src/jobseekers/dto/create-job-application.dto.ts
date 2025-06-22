@@ -1,13 +1,24 @@
-import { IsString, IsEmail, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsOptional,
+  IsUrl,
+  IsEnum,
+  IsNotEmpty,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateJobApplicationDto {
   @IsString()
+  @IsNotEmpty()
   job_id: string;
 
   @IsString()
-  fullname: string;
+  @IsNotEmpty()
+  fullName: string;
 
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
   @IsString()
@@ -16,16 +27,50 @@ export class CreateJobApplicationDto {
 
   @IsString()
   @IsOptional()
-  currentjob?: string;
+  currentJobTitle?: string;
 
-  @IsString()
+  @IsUrl()
   @IsOptional()
   linkedinUrl?: string;
 
-  @IsString()
+  @IsUrl()
   @IsOptional()
-  portfolioURL?: string;
+  portfolioUrl?: string;
 
   @IsString()
-  resumePath: string;
+  @IsOptional()
+  @MaxLength(500)
+  additionalInfo?: string;
+
+  // File upload will be handled separately in the controller
+
+  @IsOptional()
+  resume?: Express.Multer.File;
+}
+
+export class JobApplicationResponseDto {
+  id: string;
+  jobId: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  currentJobTitle?: string;
+  linkedinUrl?: string;
+  portfolioUrl?: string;
+  additionalInfo?: string;
+  resumeFileName?: string;
+  resumeFileType?: string;
+  resumeFileSize?: number;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export enum JobApplicationStatus {
+  IDLE = 'idle',
+  SUBMITTING = 'submitting',
+  SUBMITTED = 'submitted',
+  REVIEWED = 'reviewed',
+  INTERVIEW = 'interview',
+  DECISION = 'decision',
 }

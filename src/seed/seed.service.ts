@@ -16,6 +16,8 @@ import { MembersSeeder } from './seeds/members.seeder';
 import { Member } from 'src/companies/entities/member.entity';
 import { JobSeekersSeeder } from './seeds/jobseekers.seeder';
 import { JobSeeker } from 'src/jobseekers/entities/jobseeker.entity';
+import { CompanyTechStack } from 'src/companies/entities/company-tech-stack.entity';
+import { CompanyTechStackSeeder } from './seeds/company_techstack.seeder';
 
 @Injectable()
 export class SeedService {
@@ -33,6 +35,11 @@ export class SeedService {
 
     @InjectRepository(JobSeeker)
     private readonly jobseekerRepo: Repository<JobSeeker>,
+    @InjectRepository(Member)
+    private readonly MemberRepo: Repository<Member>,
+
+    @InjectRepository(CompanyTechStack)
+    private readonly CompanyTechStackRepo: Repository<CompanyTechStack>,
   ) {}
 
   async run() {
@@ -40,6 +47,17 @@ export class SeedService {
     const users = await new UsersSeeder(this.userRepo, roles).run();
     const technologies = await new TechnologySeeder(this.techRepo).run();
     const companies = await new CompaniesSeeder(this.companyRepo, users).run();
+
+    const members = await new MembersSeeder(
+      this.MemberRepo,
+      this.companyRepo,
+    ).run();
+
+    const techstacks = await new CompanyTechStackSeeder(
+      this.CompanyTechStackRepo,
+      this.companyRepo,
+      this.techRepo,
+    ).run();
 
     // const members = await new MembersSeeder(this.MemberRepo, companies).run();
     const jobs = await new JobsSeeder(

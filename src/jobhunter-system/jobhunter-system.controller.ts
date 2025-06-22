@@ -9,6 +9,7 @@ import {
 import { JobhunterSystemService } from './jobhunter-system.service';
 import { Job } from '../companies/entities/job.entity';
 import { Company } from '../companies/entities/company.entity';
+import { CompanyResponseDto } from 'src/companies/dto/company-response.dto';
 
 @Controller('jobhunter-system')
 export class JobhunterSystemController {
@@ -22,7 +23,7 @@ export class JobhunterSystemController {
     @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 30,
     @Query('searchkeyparam') searchkeyparam?: string,
     @Query('location') location?: string,
-  ): Promise<{ companies: Company[]; total: number }> {
+  ): Promise<{ companies: CompanyResponseDto[]; total: number }> {
     if (page < 1)
       throw new BadRequestException('Page must be a positive integer');
     if (limit < 1)
@@ -56,13 +57,13 @@ export class JobhunterSystemController {
     );
   }
 
-  // @Get('companies/:id')
-  // async getCompanyById(
-  //   @Param('id', ParseIntPipe) id: number,
-  // ): Promise<Company> {
-  //   if (id < 1) throw new BadRequestException('Invalid company ID');
-  //   return this.jobhunterSystemService.getCompanyById(id);
-  // }
+  @Get('companies/:id')
+  async getCompanyById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<CompanyResponseDto> {
+    if (id < 1) throw new BadRequestException('Invalid company ID');
+    return await this.jobhunterSystemService.getCompanyById(id);
+  }
 
   @Get('jobs/:id')
   async getJobById(@Param('id', ParseIntPipe) id: number): Promise<Job> {
@@ -86,7 +87,7 @@ export class JobhunterSystemController {
   async getSimilarCompanies(
     @Param('id', ParseIntPipe) id: number,
     @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 5,
-  ): Promise<{ companies: Company[]; total: number }> {
+  ): Promise<{ companies: CompanyResponseDto[]; total: number }> {
     if (id < 1) throw new BadRequestException('Invalid company ID');
     if (limit < 1)
       throw new BadRequestException('Limit must be a positive integer');

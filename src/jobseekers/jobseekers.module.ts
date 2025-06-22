@@ -19,8 +19,7 @@ import { FilesService } from 'src/files/files.service';
 import { SavedJob } from './entities/saved-job.entity';
 import { JobApplication } from './entities/application.entity';
 import { JwtService } from '@nestjs/jwt';
-import { Portfolio } from './entities/portfolio.entity';
-import { SocialLink } from './entities/social-link.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Module({
   imports: [
@@ -38,8 +37,7 @@ import { SocialLink } from './entities/social-link.entity';
       JobAlert,
       Job,
       Company,
-      Portfolio,
-      SocialLink,
+      User
     ]),
     ConfigModule,
   ],
