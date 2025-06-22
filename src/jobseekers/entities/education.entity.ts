@@ -1,18 +1,16 @@
 import { BaseEntity } from 'src/database/base.entity';
 import { JobSeeker } from 'src/jobseekers/entities/jobseeker.entity';
-import { Entity, Column, ManyToOne } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity('education_history')
 export class EducationHistory extends BaseEntity {
-
-
-  @ManyToOne(() => JobSeeker, (jobSeeker) => jobSeeker.educationHistory, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => JobSeeker, (jobSeeker) => jobSeeker.educationHistory)
+  @JoinColumn({ name: 'job_seeker_id' })
   jobSeeker: JobSeeker;
+ 
 
   @Column()
-    job_seeker_id: number;
+  job_seeker_id: number;
 
   @Column()
   institution_name: string;

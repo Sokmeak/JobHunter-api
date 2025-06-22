@@ -1,3 +1,4 @@
+
 import {
   Controller,
   Post,
@@ -5,14 +6,16 @@ import {
   Get,
   Param,
   Patch,
+  Delete,
   UseInterceptors,
   UploadedFile,
   Request,
-  Delete,
   UseGuards,
+  Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import * as multer from 'multer'; // Ensure this import works
+import * as multer from 'multer';
 import { Express } from 'express';
 import { JobSeekersService } from './jobseekers.service';
 import { CreateJobSeekerDto } from './dto/create-jobseeker.dto';
@@ -27,229 +30,750 @@ import { CreateSkillTagDto } from './dto/create-skill.dto';
 import { CreateJobAlertDto } from './dto/create-job-alert.dto';
 import { AuthenticationGuard } from 'src/auth/guards/authentication/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/role.guard';
-import { log } from 'console';
 
 @Controller('job-seekers')
 export class JobSeekersController {
+  private readonly logger = new Logger(JobSeekersController.name);
+
   constructor(private readonly jobSeekersService: JobSeekersService) {}
 
   @Post('profile')
-  createProfile(
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async createProfile(
     @Request() req,
     @Body() createJobSeekerDto: CreateJobSeekerDto,
   ) {
-    return this.jobSeekersService.createJobSeeker(
-      req.user.id,
-      createJobSeekerDto,
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `POST /job-seekers/profile called for user: ${req.user.id}`,
     );
+    try {
+      return await this.jobSeekersService.createJobSeeker(
+        req.user.id,
+        createJobSeekerDto,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in POST /job-seekers/profile for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Patch('profile')
-  updateProfile(
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async updateProfile(
     @Request() req,
-    @Body() createJobSeekerDto: CreateJobSeekerDto,
+    @Body() createJobSeekerDto: Partial<CreateJobSeekerDto>,
   ) {
-    return this.jobSeekersService.updateJobSeeker(
-      req.user.id,
-      createJobSeekerDto,
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `PATCH /job-seekers/profile called for user: ${req.user.id}`,
     );
+    try {
+      return await this.jobSeekersService.updateJobSeeker(
+        req.user.id,
+        createJobSeekerDto,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in PATCH /job-seekers/profile for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
+  }
+
+  @Patch('password')
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async changePassword(
+    @Request() req,
+    @Body() passwordData: { currentPassword: string; newPassword: string },
+  ) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `PATCH /job-seekers/password called for user: ${req.user.id}`,
+    );
+    try {
+      return await this.jobSeekersService.changePassword(
+        req.user.id,
+        passwordData.currentPassword,
+        passwordData.newPassword,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in PATCH /job-seekers/password for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Post('profile-image')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: multer.memoryStorage(), // Fixed import should resolve this
-      limits: { fileSize: 10 * 1024 * 1024 },
-    }),
-  )
-  uploadProfileImage(
-    @Request() req,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    return this.jobSeekersService.uploadProfileImage(req.user.id, file);
-  }
-
-  @Get('profile')
   @UseGuards(AuthenticationGuard, RolesGuard)
-  getProfile(@Request() req) {
-    log(req.user.id);
-    return this.jobSeekersService.getJobSeeker(req.user.id);
-  }
-
-  @Post('resumes')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: multer.memoryStorage(),
       limits: { fileSize: 10 * 1024 * 1024 },
     }),
   )
-  uploadResume(
+  async uploadProfileImage(
+    @Request() req,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `POST /job-seekers/profile-image called for user: ${req.user.id}`,
+    );
+    try {
+      return await this.jobSeekersService.uploadProfileImage(req.user.id, file);
+    } catch (err) {
+      this.logger.error(
+        `Error in POST /job-seekers/profile-image for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
+  }
+
+  @Get('profile')
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async getProfile(@Request() req: any) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(`GET /job-seekers/profile called for user: ${req.user.id}`);
+    try {
+      return await this.jobSeekersService.getJobSeeker(req.user.id);
+    } catch (err) {
+      this.logger.error(
+        `Error in GET /job-seekers/profile for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
+  }
+
+  @Post('resumes')
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: multer.memoryStorage(),
+      limits: { fileSize: 10 * 1024 * 1024 },
+    }),
+  )
+  async uploadResume(
     @Request() req,
     @UploadedFile() file: Express.Multer.File,
     @Body() createResumeDto: CreateResumeDto,
   ) {
-    return this.jobSeekersService.uploadResume(
-      req.user.id,
-      file,
-      createResumeDto,
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `POST /job-seekers/resumes called for user: ${req.user.id}`,
     );
+    try {
+      return await this.jobSeekersService.uploadResume(
+        req.user.id,
+        file,
+        createResumeDto,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in POST /job-seekers/resumes for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Delete('resumes/:id')
-  deleteResume(@Request() req, @Param('id') resumeId: number) {
-    return this.jobSeekersService.deleteResume(req.user.id, resumeId);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async deleteResume(@Request() req, @Param('id') resumeId: number) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `DELETE /job-seekers/resumes/${resumeId} called for user: ${req.user.id}`,
+    );
+    try {
+      return await this.jobSeekersService.deleteResume(req.user.id, resumeId);
+    } catch (err) {
+      this.logger.error(
+        `Error in DELETE /job-seekers/resumes/${resumeId} for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Post('applications')
-  applyForJob(
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async applyForJob(
     @Request() req,
     @Body() createJobApplicationDto: CreateJobApplicationDto,
   ) {
-    return this.jobSeekersService.applyForJob(
-      req.user.id,
-      createJobApplicationDto,
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `POST /job-seekers/applications called for user: ${req.user.id}`,
     );
+    try {
+      return await this.jobSeekersService.applyForJob(
+        req.user.id,
+        createJobApplicationDto,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in POST /job-seekers/applications for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
+  }
+
+  @Patch('applications/:id')
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async updateJobApplication(
+    @Request() req,
+    @Param('id') applicationId: number,
+    @Body() createJobApplicationDto: CreateJobApplicationDto,
+  ) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `PATCH /job-seekers/applications/${applicationId} called for user: ${req.user.id}`,
+    );
+    try {
+      return await this.jobSeekersService.updateJobApplication(
+        applicationId,
+        createJobApplicationDto,
+        req.user.id,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in PATCH /job-seekers/applications/${applicationId} for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Get('applications/:id/status')
-  getApplicationStatus(@Request() req, @Param('id') applicationId: string) {
-    return this.jobSeekersService.getApplicationStatus(
-      req.user.id,
-      applicationId,
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async getApplicationStatus(
+    @Request() req,
+    @Param('id') applicationId: number,
+  ) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `GET /job-seekers/applications/${applicationId}/status called for user: ${req.user.id}`,
     );
+    try {
+      return await this.jobSeekersService.getApplicationStatus(
+        req.user.id,
+        applicationId,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in GET /job-seekers/applications/${applicationId}/status for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Post('saved-jobs')
-  saveJob(@Request() req, @Body() createSavedJobDto: CreateSavedJobDto) {
-    return this.jobSeekersService.saveJob(req.user.id, createSavedJobDto);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async saveJob(@Request() req, @Body() createSavedJobDto: CreateSavedJobDto) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `POST /job-seekers/saved-jobs called for user: ${req.user.id}`,
+    );
+    try {
+      return await this.jobSeekersService.saveJob(
+        req.user.id,
+        createSavedJobDto,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in POST /job-seekers/saved-jobs for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Post('interview-preferences')
-  setInterviewPreference(
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async setInterviewPreference(
     @Request() req,
     @Body() createInterviewPreferenceDto: CreateInterviewPreferenceDto,
   ) {
-    return this.jobSeekersService.setInterviewPreference(
-      req.user.id,
-      createInterviewPreferenceDto,
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `POST /job-seekers/interview-preferences called for user: ${req.user.id}`,
     );
+    try {
+      return await this.jobSeekersService.setInterviewPreference(
+        req.user.id,
+        createInterviewPreferenceDto,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in POST /job-seekers/interview-preferences for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Get('interview-invitations')
-  getInterviewInvitations(@Request() req) {
-    return this.jobSeekersService.getInterviewInvitations(req.user.id);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async getInterviewInvitations(@Request() req) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `GET /job-seekers/interview-invitations called for user: ${req.user.id}`,
+    );
+    try {
+      return await this.jobSeekersService.getInterviewInvitations(req.user.id);
+    } catch (err) {
+      this.logger.error(
+        `Error in GET /job-seekers/interview-invitations for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Patch('interview-invitations/:id')
-  updateInterviewInvitation(
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async updateInterviewInvitation(
     @Request() req,
-    @Param('id') invitationId: string,
+    @Param('id') invitationId: number,
     @Body() updateInterviewInvitationDto: UpdateInterviewInvitationDto,
   ) {
-    return this.jobSeekersService.updateInterviewInvitation(
-      req.user.id,
-      invitationId,
-      updateInterviewInvitationDto,
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `PATCH /job-seekers/interview-invitations/${invitationId} called for user: ${req.user.id}`,
     );
+    try {
+      return await this.jobSeekersService.updateInterviewInvitation(
+        req.user.id,
+        invitationId,
+        updateInterviewInvitationDto,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in PATCH /job-seekers/interview-invitations/${invitationId} for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
+  @Get('education-history')
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async getEducationHistory(@Request() req: Express.Request) {
+    return this.jobSeekersService.getEducationHistory((req.user as any).id);
+  }
+  
   @Post('education-history')
-  addEducationHistory(
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async addEducationHistory(
     @Request() req,
     @Body() createEducationHistoryDto: CreateEducationHistoryDto,
   ) {
-    return this.jobSeekersService.addEducationHistory(
-      req.user.id,
-      createEducationHistoryDto,
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `POST /job-seekers/education-history called for user: ${req.user.id}`,
     );
+    try {
+      return await this.jobSeekersService.addEducationHistory(
+        req.user.id,
+        createEducationHistoryDto,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in POST /job-seekers/education-history for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Patch('education-history/:id')
-  updateEducationHistory(
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async updateEducationHistory(
     @Request() req,
     @Param('id') educationId: number,
     @Body() createEducationHistoryDto: CreateEducationHistoryDto,
   ) {
-    return this.jobSeekersService.updateEducationHistory(
-      req.user.id,
-      educationId,
-      createEducationHistoryDto,
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `PATCH /job-seekers/education-history/${educationId} called for user: ${req.user.id}`,
     );
+    try {
+      return await this.jobSeekersService.updateEducationHistory(
+        req.user.id,
+        educationId,
+        createEducationHistoryDto,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in PATCH /job-seekers/education-history/${educationId} for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Delete('education-history/:id')
-  deleteEducationHistory(@Request() req, @Param('id') educationId: number) {
-    return this.jobSeekersService.deleteEducationHistory(
-      req.user.id,
-      educationId,
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async deleteEducationHistory(
+    @Request() req,
+    @Param('id') educationId: number,
+  ) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `DELETE /job-seekers/education-history/${educationId} called for user: ${req.user.id}`,
     );
+    try {
+      return await this.jobSeekersService.deleteEducationHistory(
+        req.user.id,
+        educationId,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in DELETE /job-seekers/education-history/${educationId} for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Post('work-experience')
-  addWorkExperience(
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async addWorkExperience(
     @Request() req,
     @Body() createWorkExperienceDto: CreateWorkExperienceDto,
   ) {
-    return this.jobSeekersService.addWorkExperience(
-      req.user.id,
-      createWorkExperienceDto,
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `POST /job-seekers/work-experience called for user: ${req.user.id}`,
     );
+    try {
+      return await this.jobSeekersService.addWorkExperience(
+        req.user.id,
+        createWorkExperienceDto,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in POST /job-seekers/work-experience for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Patch('work-experience/:id')
-  updateWorkExperience(
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async updateWorkExperience(
     @Request() req,
-    @Param('id') experienceId: string,
+    @Param('id') experienceId: number,
     @Body() createWorkExperienceDto: CreateWorkExperienceDto,
   ) {
-    return this.jobSeekersService.updateWorkExperience(
-      req.user.id,
-      experienceId,
-      createWorkExperienceDto,
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `PATCH /job-seekers/work-experience/${experienceId} called for user: ${req.user.id}`,
     );
+    try {
+      return await this.jobSeekersService.updateWorkExperience(
+        req.user.id,
+        experienceId,
+        createWorkExperienceDto,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in PATCH /job-seekers/work-experience/${experienceId} for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Delete('work-experience/:id')
-  deleteWorkExperience(@Request() req, @Param('id') experienceId: string) {
-    return this.jobSeekersService.deleteWorkExperience(
-      req.user.id,
-      experienceId,
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async deleteWorkExperience(
+    @Request() req,
+    @Param('id') experienceId: number,
+  ) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `DELETE /job-seekers/work-experience/${experienceId} called for user: ${req.user.id}`,
     );
+    try {
+      return await this.jobSeekersService.deleteWorkExperience(
+        req.user.id,
+        experienceId,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in DELETE /job-seekers/work-experience/${experienceId} for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
-  @Post('skill-tags')
-  addSkillTag(@Request() req, @Body() createSkillTagDto: CreateSkillTagDto) {
-    return this.jobSeekersService.addSkillTag(req.user.id, createSkillTagDto);
-  }
+  // @Get('skill-tags')
+  // @UseGuards(AuthenticationGuard, RolesGuard)
+  // async getSkillTags(@Request() req) {
+  //   const skills = await this.jobSeekersService.getSkillTags(
+  //     (req.user as any).id,
+  //   );
+  //   return { skills }; // <-- wrap in object
+  // }
+
+  // @Post('skill-tags')
+  // @UseGuards(AuthenticationGuard, RolesGuard)
+  // async addSkillTag(
+  //   @Request() req,
+  //   @Body() createSkillTagDto: CreateSkillTagDto,
+  // ) {
+  //   if (!req.user || !req.user.id) {
+  //     this.logger.error('No user found in request');
+  //     throw new UnauthorizedException('User not authenticated');
+  //   }
+  //   this.logger.log(
+  //     `POST /job-seekers/skill-tags called for user: ${req.user.id}`,
+  //   );
+  //   try {
+  //     return await this.jobSeekersService.addSkillTag(
+  //       req.user.id,
+  //       createSkillTagDto,
+  //     );
+  //   } catch (err) {
+  //     this.logger.error(
+  //       `Error in POST /job-seekers/skill-tags for user: ${req.user.id}`,
+  //       err.stack,
+  //     );
+  //     throw err;
+  //   }
+  // }
 
   @Delete('skill-tags/:id')
-  deleteSkillTag(@Request() req, @Param('id') skillId: number) {
-    return this.jobSeekersService.deleteSkillTag(req.user.id, skillId);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async deleteSkillTag(@Request() req, @Param('id') skillId: number) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `DELETE /job-seekers/skill-tags/${skillId} called for user: ${req.user.id}`,
+    );
+    try {
+      return await this.jobSeekersService.deleteSkillTag(req.user.id, skillId);
+    } catch (err) {
+      this.logger.error(
+        `Error in DELETE /job-seekers/skill-tags/${skillId} for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Get('notifications')
-  getNotifications(@Request() req) {
-    return this.jobSeekersService.getNotifications(req.user.id);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async getNotifications(@Request() req) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `GET /job-seekers/notifications called for user: ${req.user.id}`,
+    );
+    try {
+      return await this.jobSeekersService.getNotifications(req.user.id);
+    } catch (err) {
+      this.logger.error(
+        `Error in GET /job-seekers/notifications for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Patch('notifications/:id/read')
-  markNotificationAsRead(@Request() req, @Param('id') notificationId: string) {
-    return this.jobSeekersService.markNotificationAsRead(
-      req.user.id,
-      notificationId,
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async markNotificationAsRead(
+    @Request() req,
+    @Param('id') notificationId: number,
+  ) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `PATCH /job-seekers/notifications/${notificationId}/read called for user: ${req.user.id}`,
     );
+    try {
+      return await this.jobSeekersService.markNotificationAsRead(
+        req.user.id,
+        notificationId,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in PATCH /job-seekers/notifications/${notificationId}/read for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Post('job-alerts')
-  createJobAlert(@Request() req, @Body() createJobAlertDto: CreateJobAlertDto) {
-    return this.jobSeekersService.createJobAlert(
-      req.user.id,
-      createJobAlertDto,
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async createJobAlert(
+    @Request() req,
+    @Body() createJobAlertDto: CreateJobAlertDto,
+  ) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `POST /job-seekers/job-alerts called for user: ${req.user.id}`,
     );
+    try {
+      return await this.jobSeekersService.createJobAlert(
+        req.user.id,
+        createJobAlertDto,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error in POST /job-seekers/job-alerts for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   @Get('job-alerts')
-  getJobAlerts(@Request() req) {
-    return this.jobSeekersService.getJobAlerts(req.user.id);
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async getJobAlerts(@Request() req) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+    this.logger.log(
+      `GET /job-seekers/job-alerts called for user: ${req.user.id}`,
+    );
+    try {
+      return await this.jobSeekersService.getJobAlerts(req.user.id);
+    } catch (err) {
+      this.logger.error(
+        `Error in GET /job-seekers/job-alerts for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
+
+  // @Delete('portfolios/:id')
+  // @UseGuards(AuthenticationGuard, RolesGuard)
+  // deletePortfolio(@Request() req, @Param('id') portfolioId: number) {
+  //   return this.jobSeekersService.deletePortfolio(
+  //     (req.user as any).id,
+  //     portfolioId,
+  //   );
+  // }
+
+  // @Post('social-links')
+  // @UseGuards(AuthenticationGuard, RolesGuard)
+  // addSocialLink(@Req() req, @Body() body: { url: string; platform?: string }) {
+  //   return this.jobSeekersService.addSocialLink((req.user as any).id, body);
+  // }
+
+  // @Get('social-links')
+  // @UseGuards(AuthenticationGuard, RolesGuard)
+  // getSocialLinks(@Req() req) {
+  //   return this.jobSeekersService.getSocialLinks((req.user as any).id);
+  // }
+
+  // @Patch('social-links/:id') // Updated method name to match intent
+  // @UseGuards(AuthenticationGuard, RolesGuard)
+  // updateSocialLink(
+  //   @Req() req,
+  //   @Param('id') socialLinkId: number,
+  //   @Body() updateSocialLinkDto: UpdateSocialLinkDto,
+  // ) {
+  //   return this.jobSeekersService.updateSocialLink(
+  //     (req.user as any).id,
+  //     socialLinkId,
+  //     updateSocialLinkDto,
+  //   );
+  // }
+
+  // @Delete('social-links/:id')
+  // @UseGuards(AuthenticationGuard, RolesGuard)
+  // deleteSocialLink(@Req() req, @Param('id') socialLinkId: number) {
+  //   return this.jobSeekersService.deleteSocialLink(
+  //     (req.user as any).id,
+  //     socialLinkId,
+  //   );
+  // }
 }

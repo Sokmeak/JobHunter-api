@@ -1,45 +1,54 @@
-import { User } from 'src/users/entities/user.entity';
 import {
-  Entity,
   Column,
-  OneToOne,
+  Entity,
+  PrimaryGeneratedColumn,
   OneToMany,
-  JoinColumn,
   ManyToMany,
-  JoinTable,
+  OneToOne,
+  JoinColumn,
+  ManyToOne,
 } from 'typeorm';
+import { Resume } from './resume.entity';
+import { JobApplication } from './application.entity';
+import { SavedJob } from './saved-job.entity';
+import { InterviewPreference } from './interview-preference.entity';
 import { EducationHistory } from './education.entity';
 import { WorkExperience } from './experience.entity';
-import { SkillTag } from './skill.entity';
+
 import { InterviewInvitation } from './interview-invitation.entity';
 import { JobAlert } from './job-alert.entity';
-import { InterviewPreference } from './interview-preference.entity';
-import { BaseEntity } from 'src/database/base.entity';
-import { Resume } from './resume.entity';
-import { SavedJob } from './saved-job.entity';
-import { JobApplication } from './application.entity';
-import { IsOptional } from 'class-validator';
 import { Job } from 'src/companies/entities/job.entity';
+import { User } from 'src/users/entities/user.entity';
 
-@Entity('job_seekers')
-export class JobSeeker extends BaseEntity {
-  constructor(partial?: Partial<JobSeeker>) {
-    super();
-    Object.assign(this, partial);
-  }
+@Entity()
+export class JobSeeker {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @OneToOne(() => User, { onDelete: 'CASCADE' })
+  @Column({unique: true })
+  user_id: number;
+
+  @ManyToOne(() => User, (user) => user.jobSeekers)
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @Column({ nullable: true })
+  @Column()
   jobseeker_name: string;
 
-  @Column({ nullable: true })
+  @Column()
   jobseeker_email: string;
 
-  @Column()
-  user_id: number;
+  @Column({ nullable: true })
+  phone: string;
+
+  @Column({ type: 'date', nullable: true })
+  dateOfBirth: string;
+
+  @Column({ nullable: true })
+  gender: string;
+
+  @Column({ default: 'jobSeeker' })
+  accountType: string;
 
   @Column({ nullable: true })
   profile_image: string;
@@ -47,7 +56,7 @@ export class JobSeeker extends BaseEntity {
   @Column({ nullable: true })
   headline: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ nullable: true })
   bio: string;
 
   @Column({ nullable: true })
@@ -56,51 +65,44 @@ export class JobSeeker extends BaseEntity {
   @Column({ nullable: true })
   preferred_location: string;
 
-  @Column({ type: 'integer', nullable: true })
+  @Column({ type: 'float', nullable: true })
   expected_salary: number;
 
-  @OneToMany(() => Resume, (resume) => resume.jobSeeker, { cascade: true })
+  @Column({ type: 'jsonb', nullable: true, default: [] })
+  portfolios: { id: number; title: string; url: string; description: string }[];
+
+  @Column({ type: 'jsonb', nullable: true, default: [] })
+  socialLinks: { platform: string; url: string }[];
+
+  @OneToMany(() => Resume, (resume) => resume.jobSeeker)
   resumes: Resume[];
 
-  @OneToMany(() => JobApplication, (application) => application.jobSeeker, {
-    cascade: true,
-  })
+  @OneToMany(() => JobApplication, (application) => application.jobSeeker)
+  @JoinColumn({ name: 'user_id' })
   applications: JobApplication[];
 
-  @OneToMany(() => SavedJob, (savedJob) => savedJob.jobSeeker, {
-    cascade: true,
-  })
+  @OneToMany(() => SavedJob, (savedJob) => savedJob.jobSeeker)
   savedJobs: SavedJob[];
 
-  @OneToOne(() => InterviewPreference, (preference) => preference.jobSeeker, {
-    cascade: true,
-  })
-  @JoinColumn({ name: 'jobseeker_id' })
+  @OneToOne(() => InterviewPreference, (preference) => preference.jobSeeker)
+  @JoinColumn()
   interviewPreference: InterviewPreference;
 
-  @OneToMany(() => EducationHistory, (education) => education.jobSeeker, {
-    cascade: true,
-  })
+  @OneToMany(() => EducationHistory, (education) => education.jobSeeker)
   educationHistory: EducationHistory[];
 
-  @OneToMany(() => WorkExperience, (experience) => experience.jobSeeker, {
-    cascade: true,
-  })
+  @OneToMany(() => WorkExperience, (experience) => experience.jobSeeker)
   workExperience: WorkExperience[];
 
-  @OneToMany(() => SkillTag, (skill) => skill.jobSeeker, { cascade: true })
-  skillTags: SkillTag[];
+  // @OneToMany(() => SkillTag, (skill) => skill.jobSeeker)
+  // skillTags: SkillTag[];
 
-  @OneToMany(() => InterviewInvitation, (invitation) => invitation.jobSeeker, {
-    cascade: true,
-  })
+  @OneToMany(() => InterviewInvitation, (invitation) => invitation.jobSeeker)
   interviewInvitations: InterviewInvitation[];
 
-  @OneToMany(() => JobAlert, (alert) => alert.jobSeeker, { cascade: true })
+  @OneToMany(() => JobAlert, (alert) => alert.jobSeeker)
   jobAlerts: JobAlert[];
 
-  // New Many-to-Many relationship with Job
   @ManyToMany(() => Job, (job) => job.jobSeekers)
-  @JoinTable()
   jobs: Job[];
 }
