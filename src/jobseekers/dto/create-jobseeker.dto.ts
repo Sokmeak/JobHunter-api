@@ -1,16 +1,38 @@
-import { IsString, IsOptional, IsInt, Min, IsNumber, IsArray } from 'class-validator';
+import {
+  IsNumber,
+  IsString,
+  IsEmail,
+  IsOptional,
+  IsArray,
+  IsObject,
+  IsDateString,
+} from 'class-validator';
 
 export class CreateJobSeekerDto {
-  @IsInt()
+  @IsNumber()
   user_id: number;
 
   @IsString()
-  @IsOptional()
-  jobseeker_name?: string;
+  jobseeker_name: string;
+
+  @IsEmail()
+  jobseeker_email: string;
 
   @IsString()
   @IsOptional()
-  jobseeker_email?: string;
+  phone?: string;
+
+  @IsDateString()
+  @IsOptional()
+  dateOfBirth?: string;
+
+  @IsString()
+  @IsOptional()
+  gender?: string;
+
+  @IsString()
+  @IsOptional()
+  accountType?: string;
 
   @IsString()
   @IsOptional()
@@ -32,13 +54,24 @@ export class CreateJobSeekerDto {
   @IsOptional()
   preferred_location?: string;
 
-  @IsInt()
-  @Min(0)
+  @IsNumber()
   @IsOptional()
   expected_salary?: number;
 
   @IsArray()
-  @IsInt({ each: true })
+  @IsOptional()
+  portfolios?: {
+    id: number;
+    title: string;
+    url: string;
+    description: string;
+  }[];
+
+  @IsArray()
+  @IsOptional()
+  socialLinks?: { platform: string; url: string }[];
+
+  @IsArray()
   @IsOptional()
   jobIds?: number[];
 }

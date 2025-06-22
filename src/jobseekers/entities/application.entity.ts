@@ -1,27 +1,38 @@
-import { JobSeeker } from '../entities/jobseeker.entity';
-
-import { Entity, Column, ManyToOne } from 'typeorm';
 import { BaseEntity } from 'src/database/base.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { JobSeeker } from './jobseeker.entity';
 import { Job } from 'src/companies/entities/job.entity';
 
 @Entity('job_applications')
 export class JobApplication extends BaseEntity {
-  @ManyToOne(() => JobSeeker, (jobSeeker) => jobSeeker.applications, {
-    onDelete: 'CASCADE',
-  })
-  jobSeeker: JobSeeker;
-
-  @Column()
-   job_seeker_id: number;
-
-  @ManyToOne(() => Job, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Job, (job) => job.applications)
+  @JoinColumn({ name: 'job_id' })
   job: Job;
 
   @Column()
-  job_id: string;
+  job_id: number;
+
+  // job_application.entity.ts
+  @ManyToOne(() => JobSeeker, (jobSeeker) => jobSeeker.applications, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' }) // IMPORTANT
+  jobSeeker: JobSeeker;
 
   @Column()
-  fullname: string;
+  user_id: number;
+
+  @Column()
+  fullName: string;
 
   @Column()
   email: string;
@@ -30,20 +41,40 @@ export class JobApplication extends BaseEntity {
   phone: string;
 
   @Column({ nullable: true })
-  currentjob: string;
+  currentJobTitle: string;
 
   @Column({ nullable: true })
   linkedinUrl: string;
 
   @Column({ nullable: true })
-  portfolioURL: string;
+  portfolioUrl: string;
 
-  @Column()
-  resumePath: string;
+  @Column('text', { nullable: true })
+  additionalInfo: string;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  applied_at: Date;
+  @Column({ nullable: true })
+  resumeFileName: string;
 
-  @Column({ default: 'pending' }) // Added status field
-  status: string; // e.g., pending, reviewed, accepted, rejected
+  @Column({ nullable: true })
+  resumeFilePath: string;
+
+  @Column({ nullable: true })
+  resumeFileType: string;
+
+  @Column({ nullable: true })
+  resumeFileSize: number;
+
+  @Column({
+    type: 'enum',
+    enum: [
+      'idle',
+      'submitting',
+      'submitted',
+      'reviewed',
+      'interview',
+      'decision',
+    ],
+    default: 'idle',
+  })
+  status: string;
 }

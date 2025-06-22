@@ -39,4 +39,11 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Notification_Applicant, (notification) => notification.user)
   notifications: Notification_Applicant[];
+
+  @ManyToOne(() => User, (user) => user.jobSeekers)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @OneToMany(() => User, (user) => user.user)
+  jobSeekers: User[];
 }

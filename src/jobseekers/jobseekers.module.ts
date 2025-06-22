@@ -19,6 +19,7 @@ import { FilesService } from 'src/files/files.service';
 import { SavedJob } from './entities/saved-job.entity';
 import { JobApplication } from './entities/application.entity';
 import { JwtService } from '@nestjs/jwt';
+import { User } from 'src/users/entities/user.entity';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { JwtService } from '@nestjs/jwt';
       JobAlert,
       Job,
       Company,
+      User
     ]),
     ConfigModule,
   ],
