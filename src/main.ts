@@ -15,7 +15,15 @@ async function bootstrap() {
     }),
   );
   log('🔧 Global validation pipe enabled');
-  app.enableCors();
+  app.enableCors({
+    origin: [
+      'http://api.sokmeak.site',
+      'https://api.sokmeak.site',
+      'http://localhost:5173',
+      'https://localhost:5173',
+    ],
+    // credentials: true,
+  });
 
   const dataSource = app.get(DataSource);
 
