@@ -17,8 +17,8 @@ async function bootstrap() {
   log('🔧 Global validation pipe enabled');
   app.enableCors({
     origin: [
-      'http://api.sokmeak.site',
-      'https://api.sokmeak.site',
+      'http://jobhunter.sokmeak.site',
+      'https://jobhunter.sokmeak.site',
       'http://localhost:5173',
       'https://localhost:5173',
     ],
