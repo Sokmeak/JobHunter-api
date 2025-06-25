@@ -6,10 +6,10 @@ import { Entity, Column, ManyToOne } from 'typeorm';
 export class SkillTag extends BaseEntity {
 
 
-  @ManyToOne(() => JobSeeker, (jobSeeker) => jobSeeker.skillTags, {
-    onDelete: 'CASCADE',
-  })
-  jobSeeker: JobSeeker;
+  // @ManyToOne(() => JobSeeker, (jobSeeker) => jobSeeker.skillTags, {
+  //   onDelete: 'CASCADE',
+  // })
+  // jobSeeker: JobSeeker;
 
   @Column()
    job_seeker_id: number;
