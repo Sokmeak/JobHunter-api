@@ -21,7 +21,7 @@ import { CreateSavedJobDto } from './dto/create-saved-job.dto';
 import { UpdateInterviewInvitationDto } from './dto/update-interview-invitation.dto';
 import { CreateEducationHistoryDto } from './dto/create-education.dto';
 import { CreateWorkExperienceDto } from './dto/create-experience.dto';
-import { CreateSkillTagDto } from './dto/create-skill.dto';
+
 import { CreateJobAlertDto } from './dto/create-job-alert.dto';
 import { Resume } from './entities/resume.entity';
 import { InterviewPreference } from './entities/interview-preference.entity';
@@ -56,8 +56,7 @@ export class JobSeekersService {
     private educationHistoryRepository: Repository<EducationHistory>,
     @InjectRepository(WorkExperience)
     private workExperienceRepository: Repository<WorkExperience>,
-    @InjectRepository(SkillTag)
-    private skillTagRepository: Repository<SkillTag>,
+
     @InjectRepository(Notification_Applicant)
     private notificationRepository: Repository<Notification_Applicant>,
     @InjectRepository(InterviewInvitation)
@@ -117,13 +116,12 @@ export class JobSeekersService {
       relations: [
         'educationHistory',
         'workExperience',
-        'skillTags',
+
         'resumes',
         'applications',
         'savedJobs',
         'interviewInvitations',
         'jobAlerts',
-        'portfolios',
         'socialLinks',
       ],
     });
@@ -203,11 +201,9 @@ export class JobSeekersService {
         'interviewPreference',
         'educationHistory',
         'workExperience',
-        'skillTags',
+
         'interviewInvitations',
         'jobAlerts',
-        'portfolios',
-        'socialLinks',
       ],
     });
 
@@ -221,8 +217,6 @@ export class JobSeekersService {
     const resumes = await this.resumeRepository.findOne({
       where: { job_seeker_id: userId },
     });
-
- 
 
     if (!resumes) {
       throw new NotFoundException('Resume not found or access denied');
@@ -334,7 +328,10 @@ export class JobSeekersService {
     }
 
     // Optional: Prevent certain fields from being updated
-    if (updateDto.job_id && updateDto.job_id !== application.job_id.toString()) {
+    if (
+      updateDto.job_id &&
+      updateDto.job_id !== application.job_id.toString()
+    ) {
       throw new BadRequestException('Cannot change job ID of an application');
     }
 
@@ -565,19 +562,19 @@ export class JobSeekersService {
   //   return this.skillTagRepository.save(skillTag);
   // }
 
-  async deleteSkillTag(userId: number, skillTagId: number): Promise<void> {
-    const skillTag = await this.skillTagRepository.findOne({
-      where: { id: skillTagId, job_seeker_id: userId },
-    });
-    if (!skillTag) throw new NotFoundException('Skill tag not found');
-    await this.skillTagRepository.remove(skillTag);
-  }
+  // async deleteSkillTag(userId: number, skillTagId: number): Promise<void> {
+  //   const skillTag = await this.skillTagRepository.findOne({
+  //     where: { id: skillTagId, job_seeker_id: userId },
+  //   });
+  //   if (!skillTag) throw new NotFoundException('Skill tag not found');
+  //   await this.skillTagRepository.remove(skillTag);
+  // }
 
-  async getNotifications(userId: number): Promise<Notification_Applicant[]> {
-    return this.notificationRepository.find({
-      where: { user_id: userId },
-    });
-  }
+  // async getNotifications(userId: number): Promise<Notification_Applicant[]> {
+  //   return this.notificationRepository.find({
+  //     where: { user_id: userId },
+  //   });
+  // }
 
   async markNotificationAsRead(
     userId: number,
@@ -616,5 +613,4 @@ export class JobSeekersService {
       order: { created_at: 'DESC' },
     });
   }
-
 }
