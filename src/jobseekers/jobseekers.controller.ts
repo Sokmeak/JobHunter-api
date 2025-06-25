@@ -1,4 +1,3 @@
-
 import {
   Controller,
   Post,
@@ -30,6 +29,7 @@ import { CreateWorkExperienceDto } from './dto/create-experience.dto';
 import { CreateJobAlertDto } from './dto/create-job-alert.dto';
 import { AuthenticationGuard } from 'src/auth/guards/authentication/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/role.guard';
+import { log } from 'node:console';
 
 @Controller('job-seekers')
 export class JobSeekersController {
@@ -280,6 +280,26 @@ export class JobSeekersController {
     }
   }
 
+  @Get('applications')
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async getApplications(@Request() req, @Param('id') applicationId: number) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+
+    try {
+      log(`GET /job-seekers/applications called for user: ${req.user.id}`);
+      return await this.jobSeekersService.getApplications(req.user.id);
+    } catch (err) {
+      this.logger.error(
+        `Error in GET /job-seekers/applications/${applicationId}/status for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
+  }
+
   @Get('applications/:id/status')
   @UseGuards(AuthenticationGuard, RolesGuard)
   async getApplicationStatus(
@@ -413,7 +433,7 @@ export class JobSeekersController {
   async getEducationHistory(@Request() req: Express.Request) {
     return this.jobSeekersService.getEducationHistory((req.user as any).id);
   }
-  
+
   @Post('education-history')
   @UseGuards(AuthenticationGuard, RolesGuard)
   async addEducationHistory(

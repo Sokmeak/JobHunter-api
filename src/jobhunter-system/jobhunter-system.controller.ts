@@ -73,8 +73,8 @@ export class JobhunterSystemController {
 
   @Get('jobs/:id/similar')
   async getSimilarJobs(
-    @Param('id', ParseIntPipe) id: number,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 5,
+    @Param('id') id: number,
+    @Param('limit') limit: number = 5,
   ): Promise<{ jobs: Job[]; total: number }> {
     if (id < 1) throw new BadRequestException('Invalid job ID');
     if (limit < 1)
