@@ -21,7 +21,7 @@ import { CreateSavedJobDto } from './dto/create-saved-job.dto';
 import { UpdateInterviewInvitationDto } from './dto/update-interview-invitation.dto';
 import { CreateEducationHistoryDto } from './dto/create-education.dto';
 import { CreateWorkExperienceDto } from './dto/create-experience.dto';
-import { CreateSkillTagDto } from './dto/create-skill.dto';
+
 import { CreateJobAlertDto } from './dto/create-job-alert.dto';
 import { Resume } from './entities/resume.entity';
 import { InterviewPreference } from './entities/interview-preference.entity';
@@ -56,8 +56,7 @@ export class JobSeekersService {
     private educationHistoryRepository: Repository<EducationHistory>,
     @InjectRepository(WorkExperience)
     private workExperienceRepository: Repository<WorkExperience>,
-    @InjectRepository(SkillTag)
-    private skillTagRepository: Repository<SkillTag>,
+
     @InjectRepository(Notification_Applicant)
     private notificationRepository: Repository<Notification_Applicant>,
     @InjectRepository(InterviewInvitation)
@@ -117,13 +116,12 @@ export class JobSeekersService {
       relations: [
         'educationHistory',
         'workExperience',
-        'skillTags',
+
         'resumes',
         'applications',
         'savedJobs',
         'interviewInvitations',
         'jobAlerts',
-        'portfolios',
         'socialLinks',
       ],
     });
@@ -199,15 +197,16 @@ export class JobSeekersService {
       relations: [
         'resumes',
         'applications',
+        'applications.job',
+
         'savedJobs',
+
         'interviewPreference',
         'educationHistory',
         'workExperience',
-        'skillTags',
         'interviewInvitations',
+
         'jobAlerts',
-        'portfolios',
-        'socialLinks',
       ],
     });
 
@@ -221,8 +220,6 @@ export class JobSeekersService {
     const resumes = await this.resumeRepository.findOne({
       where: { job_seeker_id: userId },
     });
-
- 
 
     if (!resumes) {
       throw new NotFoundException('Resume not found or access denied');
@@ -334,7 +331,10 @@ export class JobSeekersService {
     }
 
     // Optional: Prevent certain fields from being updated
-    if (updateDto.job_id && updateDto.job_id !== application.job_id.toString()) {
+    if (
+      updateDto.job_id &&
+      updateDto.job_id !== application.job_id.toString()
+    ) {
       throw new BadRequestException('Cannot change job ID of an application');
     }
 
@@ -353,14 +353,63 @@ export class JobSeekersService {
     if (!application) throw new NotFoundException('Application not found');
     return application;
   }
-
-  async getApplications(userId: number): Promise<JobApplication[]> {
+  async getApplications(userId: number): Promise<any[]> {
     const applications = await this.jobApplicationRepository.find({
       where: { user_id: userId },
-      relations: ['job'],
+      relations: ['job', 'job.company'],
     });
+
     if (!applications) throw new NotFoundException('Applications not found');
-    return applications;
+
+    return applications.map((app) => ({
+      id: app.id,
+      createdAt: app.createdAt,
+      updatedAt: app.updatedAt,
+      deletedAt: app.deletedAt,
+      job_id: app.job_id,
+      user_id: app.user_id,
+      fullName: app.fullName,
+      email: app.email,
+      phone: app.phone,
+      currentJobTitle: app.currentJobTitle,
+      linkedinUrl: app.linkedinUrl,
+      portfolioUrl: app.portfolioUrl,
+      additionalInfo: app.additionalInfo,
+      resumeFileName: app.resumeFileName,
+      resumeFilePath: app.resumeFilePath,
+      resumeFileType: app.resumeFileType,
+      resumeFileSize: app.resumeFileSize,
+      status: app.status,
+      job: {
+        id: app.job.id,
+        createdAt: app.job.createdAt,
+        updatedAt: app.job.updatedAt,
+        deletedAt: app.job.deletedAt,
+        CompanyName: app.job.company?.name ?? null, // mapped from relation
+        CompanyLogo: app.job.company?.brand_logo ?? null, // mapped from relation
+        company_id: app.job.company_id,
+        title: app.job.title,
+        description: app.job.description,
+        responsibility: app.job.responsibility,
+        qualification: app.job.qualification,
+        level: app.job.level,
+        job_type: app.job.job_type,
+        skill_required: app.job.skill_required,
+        salary_range: app.job.salary_range,
+        location: app.job.location,
+        capacity: app.job.capacity,
+        posted_at: app.job.posted_at,
+        expired_date: app.job.expired_date,
+        is_visible: app.job.is_visible,
+        views: app.job.views,
+        applicant_applied: app.job.applicant_applied,
+        who_you_are: app.job.who_you_are,
+        nice_to_haves: app.job.nice_to_haves,
+        tags: app.job.tags,
+        perks_benefits: app.job.perks_benefits,
+        created_by: app.job.created_by,
+      },
+    }));
   }
 
   async saveJob(
@@ -565,19 +614,19 @@ export class JobSeekersService {
   //   return this.skillTagRepository.save(skillTag);
   // }
 
-  async deleteSkillTag(userId: number, skillTagId: number): Promise<void> {
-    const skillTag = await this.skillTagRepository.findOne({
-      where: { id: skillTagId, job_seeker_id: userId },
-    });
-    if (!skillTag) throw new NotFoundException('Skill tag not found');
-    await this.skillTagRepository.remove(skillTag);
-  }
+  // async deleteSkillTag(userId: number, skillTagId: number): Promise<void> {
+  //   const skillTag = await this.skillTagRepository.findOne({
+  //     where: { id: skillTagId, job_seeker_id: userId },
+  //   });
+  //   if (!skillTag) throw new NotFoundException('Skill tag not found');
+  //   await this.skillTagRepository.remove(skillTag);
+  // }
 
-  async getNotifications(userId: number): Promise<Notification_Applicant[]> {
-    return this.notificationRepository.find({
-      where: { user_id: userId },
-    });
-  }
+  // async getNotifications(userId: number): Promise<Notification_Applicant[]> {
+  //   return this.notificationRepository.find({
+  //     where: { user_id: userId },
+  //   });
+  // }
 
   async markNotificationAsRead(
     userId: number,
@@ -616,5 +665,4 @@ export class JobSeekersService {
       order: { created_at: 'DESC' },
     });
   }
-
 }

@@ -36,6 +36,9 @@ import { SkillTag } from 'src/jobseekers/entities/skill.entity';
 import { InterviewInvitation } from 'src/jobseekers/entities/interview-invitation.entity';
 import { JobAlert } from 'src/jobseekers/entities/job-alert.entity';
 import { Notification } from 'src/companies/entities/notification.entity';
+import { JobhunterSystemService } from 'src/jobhunter-system/jobhunter-system.service';
+
+
 
 @Module({
   imports: [
@@ -87,6 +90,7 @@ import { Notification } from 'src/companies/entities/notification.entity';
     FilesService,
     RolesService,
     JobSeekersService,
+    JobhunterSystemService
   ],
   exports: [AuthService, JwtModule],
 })

@@ -40,7 +40,7 @@ export class FileController {
     return { url: await this.filesService.getFileUrl(fileName, type) };
   }
 
-  @Get('image/:fileName')
+  @Get('originals/:fileName')
   async getFileImage(
     @Param('fileName') fileName: string,
     @Query('type') type: 'original' | 'thumbnail' = 'original',

@@ -25,7 +25,7 @@ export class JobhunterSystemService {
     private readonly companyRepository: Repository<Company>,
     private readonly filesService: FilesService,
   ) {}
-  private async enhanceCompany(company: Company): Promise<CompanyResponseDto> {
+  public async enhanceCompany(company: Company): Promise<CompanyResponseDto> {
     const officeImages: EnhancedOfficeImage[] = (
       company.officeLocations ?? []
     ).flatMap((location) =>
@@ -110,7 +110,7 @@ export class JobhunterSystemService {
     );
   }
   // Helper method to enhance a job with company brand_logo thumbnail
-  private async enhanceJob(job: Job): Promise<Job> {
+  public async enhanceJob(job: Job): Promise<Job> {
     if (job.company?.brand_logo) {
       try {
         job.company['brand_logo_thumbnail'] =
@@ -130,7 +130,7 @@ export class JobhunterSystemService {
   }
 
   // Helper method to enhance multiple jobs
-  private async enhanceJobs(jobs: Job[]): Promise<Job[]> {
+  public  async enhanceJobs(jobs: Job[]): Promise<Job[]> {
     return Promise.all(jobs.map((job) => this.enhanceJob(job)));
   }
 

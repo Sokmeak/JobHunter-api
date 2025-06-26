@@ -21,6 +21,7 @@ import { Notification } from './entities/notification.entity';
 import { Role } from 'src/roles/entities/role.entity';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
+import { JobhunterSystemService } from 'src/jobhunter-system/jobhunter-system.service';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { JwtService } from '@nestjs/jwt';
     BcryptProvider,
     FilesService,
     JwtService,
+    JobhunterSystemService,
   ],
 })
 export class CompaniesModule {}

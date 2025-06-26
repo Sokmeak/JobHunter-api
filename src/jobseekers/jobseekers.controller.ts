@@ -1,4 +1,3 @@
-
 import {
   Controller,
   Post,
@@ -26,10 +25,11 @@ import { CreateInterviewPreferenceDto } from './dto/create-interview-preference.
 import { UpdateInterviewInvitationDto } from './dto/update-interview-invitation.dto';
 import { CreateEducationHistoryDto } from './dto/create-education.dto';
 import { CreateWorkExperienceDto } from './dto/create-experience.dto';
-import { CreateSkillTagDto } from './dto/create-skill.dto';
+// import { CreateSkillTagDto } from './dto/create-skill.dto';
 import { CreateJobAlertDto } from './dto/create-job-alert.dto';
 import { AuthenticationGuard } from 'src/auth/guards/authentication/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/role.guard';
+import { log } from 'node:console';
 
 @Controller('job-seekers')
 export class JobSeekersController {
@@ -280,6 +280,26 @@ export class JobSeekersController {
     }
   }
 
+  @Get('applications')
+  @UseGuards(AuthenticationGuard, RolesGuard)
+  async getApplications(@Request() req, @Param('id') applicationId: number) {
+    if (!req.user || !req.user.id) {
+      this.logger.error('No user found in request');
+      throw new UnauthorizedException('User not authenticated');
+    }
+
+    try {
+      log(`GET /job-seekers/applications called for user: ${req.user.id}`);
+      return await this.jobSeekersService.getApplications(req.user.id);
+    } catch (err) {
+      this.logger.error(
+        `Error in GET /job-seekers/applications/${applicationId}/status for user: ${req.user.id}`,
+        err.stack,
+      );
+      throw err;
+    }
+  }
+
   @Get('applications/:id/status')
   @UseGuards(AuthenticationGuard, RolesGuard)
   async getApplicationStatus(
@@ -413,7 +433,7 @@ export class JobSeekersController {
   async getEducationHistory(@Request() req: Express.Request) {
     return this.jobSeekersService.getEducationHistory((req.user as any).id);
   }
-  
+
   @Post('education-history')
   @UseGuards(AuthenticationGuard, RolesGuard)
   async addEducationHistory(
@@ -614,49 +634,49 @@ export class JobSeekersController {
   //     );
   //     throw err;
   //   }
+  // // }
+
+  // @Delete('skill-tags/:id')
+  // @UseGuards(AuthenticationGuard, RolesGuard)
+  // async deleteSkillTag(@Request() req, @Param('id') skillId: number) {
+  //   if (!req.user || !req.user.id) {
+  //     this.logger.error('No user found in request');
+  //     throw new UnauthorizedException('User not authenticated');
+  //   }
+  //   this.logger.log(
+  //     `DELETE /job-seekers/skill-tags/${skillId} called for user: ${req.user.id}`,
+  //   );
+  //   try {
+  //     return await this.jobSeekersService.deleteSkillTag(req.user.id, skillId);
+  //   } catch (err) {
+  //     this.logger.error(
+  //       `Error in DELETE /job-seekers/skill-tags/${skillId} for user: ${req.user.id}`,
+  //       err.stack,
+  //     );
+  //     throw err;
+  //   }
   // }
 
-  @Delete('skill-tags/:id')
-  @UseGuards(AuthenticationGuard, RolesGuard)
-  async deleteSkillTag(@Request() req, @Param('id') skillId: number) {
-    if (!req.user || !req.user.id) {
-      this.logger.error('No user found in request');
-      throw new UnauthorizedException('User not authenticated');
-    }
-    this.logger.log(
-      `DELETE /job-seekers/skill-tags/${skillId} called for user: ${req.user.id}`,
-    );
-    try {
-      return await this.jobSeekersService.deleteSkillTag(req.user.id, skillId);
-    } catch (err) {
-      this.logger.error(
-        `Error in DELETE /job-seekers/skill-tags/${skillId} for user: ${req.user.id}`,
-        err.stack,
-      );
-      throw err;
-    }
-  }
-
-  @Get('notifications')
-  @UseGuards(AuthenticationGuard, RolesGuard)
-  async getNotifications(@Request() req) {
-    if (!req.user || !req.user.id) {
-      this.logger.error('No user found in request');
-      throw new UnauthorizedException('User not authenticated');
-    }
-    this.logger.log(
-      `GET /job-seekers/notifications called for user: ${req.user.id}`,
-    );
-    try {
-      return await this.jobSeekersService.getNotifications(req.user.id);
-    } catch (err) {
-      this.logger.error(
-        `Error in GET /job-seekers/notifications for user: ${req.user.id}`,
-        err.stack,
-      );
-      throw err;
-    }
-  }
+  // @Get('notifications')
+  // @UseGuards(AuthenticationGuard, RolesGuard)
+  // async getNotifications(@Request() req) {
+  //   if (!req.user || !req.user.id) {
+  //     this.logger.error('No user found in request');
+  //     throw new UnauthorizedException('User not authenticated');
+  //   }
+  //   this.logger.log(
+  //     `GET /job-seekers/notifications called for user: ${req.user.id}`,
+  //   );
+  //   try {
+  //     return await this.jobSeekersService.getNotifications(req.user.id);
+  //   } catch (err) {
+  //     this.logger.error(
+  //       `Error in GET /job-seekers/notifications for user: ${req.user.id}`,
+  //       err.stack,
+  //     );
+  //     throw err;
+  //   }
+  // }
 
   @Patch('notifications/:id/read')
   @UseGuards(AuthenticationGuard, RolesGuard)
