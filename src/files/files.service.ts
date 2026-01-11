@@ -106,12 +106,19 @@ export class FilesService {
       type === 'original' ? this.originalPrefix : this.thumbnailPrefix;
     const objectPath = `${prefix}${fileName}`;
     try {
-      return await this.minioClient.presignedUrl(
+      let url = await this.minioClient.presignedUrl(
         'GET',
         this.bucketName,
         objectPath,
         24 * 60 * 60,
       );
+
+      // Replace Docker service name with localhost for development
+      if (url.includes('minio:9000')) {
+        url = url.replace('minio:9000', 'localhost:9000');
+      }
+
+      return url;
     } catch (error) {
       console.error(`Error generating presigned URL for ${objectPath}:`, error);
       throw new Error(`Failed to get URL: ${error.message}`);

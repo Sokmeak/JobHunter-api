@@ -11,7 +11,6 @@ import { CompaniesModule } from './companies/companies.module';
 import { FilesModule } from './files/files.module';
 import { JobSeekersModule } from './jobseekers/jobseekers.module';
 import { TechnologyModule } from './companies/technology/technology.module';
-
 import { JobhunterSystemModule } from './jobhunter-system/jobhunter-system.module';
 
 @Module({

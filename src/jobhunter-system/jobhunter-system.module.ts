@@ -8,8 +8,9 @@ import { Company } from '../companies/entities/company.entity';
 import { FilesService } from 'src/files/files.service';
 
 @Module({
-   imports: [TypeOrmModule.forFeature([Job, Company])],
+  imports: [TypeOrmModule.forFeature([Job, Company])],
   controllers: [JobhunterSystemController],
   providers: [JobhunterSystemService, FilesService],
+  exports: [JobhunterSystemService], // Export the service so it can be used in other modules
 })
 export class JobhunterSystemModule {}
